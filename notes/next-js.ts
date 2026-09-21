@@ -28,7 +28,7 @@ export const nextjsNotes: NoteData = {
     {
       title: "What is Next.js?",
       content:
-        "Next.js is a React framework for building full-stack web applications. It provides routing, server-side rendering, API handling, caching, and performance optimizations.",
+        "Next.js is a React framework for building full-stack web apps. It adds things React alone doesn't have, like routing, server-side rendering, API endpoints, caching, and performance tools.",
 
       code: {
         language: "tsx",
@@ -41,7 +41,7 @@ export const nextjsNotes: NoteData = {
     {
       title: "Why Next.js?",
       content:
-        "Next.js provides features on top of React such as file-based routing, Server Components, server-side rendering, API routes, image optimization, and SEO support.",
+        "React only handles the UI layer. Next.js builds on top of it with file-based routing, Server Components, server-side rendering, API routes, image optimization, and SEO support.",
 
       code: {
         language: "text",
@@ -60,7 +60,7 @@ Performance`,
     {
       title: "App Router",
       content:
-        "The App Router uses the app directory for routing. Folders represent URL segments and page.tsx represents a route.",
+        "The App Router uses the app folder for routing. Each folder is a URL segment, and a page.tsx file inside a folder is what actually makes that segment visitable as a route.",
 
       code: {
         language: "text",
@@ -76,7 +76,7 @@ Performance`,
     {
       title: "File-Based Routing",
       content:
-        "Next.js creates routes based on the file and folder structure.",
+        "Next.js builds your routes from the file and folder structure inside app. There's no separate routes config file to maintain by hand.",
 
       code: {
         language: "text",
@@ -92,7 +92,7 @@ Performance`,
     {
       title: "Dynamic Routes",
       content:
-        "Dynamic routes use square brackets to create routes based on dynamic values.",
+        "A folder name in square brackets, like [id], creates a dynamic route. Next.js matches whatever value shows up in that part of the URL and passes it to the page as a route parameter.",
 
       code: {
         language: "text",
@@ -109,7 +109,7 @@ Performance`,
     {
       title: "Nested Routes",
       content:
-        "Folders can be nested to create nested URL structures.",
+        "Nesting folders inside app creates nested URL paths. Each level of nesting can have its own page.tsx and its own layout.tsx.",
 
       code: {
         language: "text",
@@ -125,7 +125,7 @@ Performance`,
     {
       title: "Layouts",
       content:
-        "layout.tsx is used for UI that should be shared between multiple pages, such as navigation, sidebar, or dashboard layout.",
+        "layout.tsx defines UI that stays the same across multiple pages, like a navbar or sidebar. Layouts wrap their child pages automatically and keep their own state when the user navigates between pages inside them. Every app needs a root layout that includes the html and body tags.",
 
       code: {
         language: "tsx",
@@ -145,7 +145,7 @@ Performance`,
     {
       title: "Server Components",
       content:
-        "In the App Router, components are Server Components by default. They run on the server and are useful for fetching data and reducing client-side JavaScript.",
+        "In the App Router, every component is a Server Component by default. They run only on the server, so they can fetch data directly and keep extra JavaScript out of the browser bundle.",
 
       code: {
         language: "tsx",
@@ -160,7 +160,7 @@ Performance`,
     {
       title: "Client Components",
       content:
-        "A Client Component is needed when the component uses state, effects, event handlers, or browser APIs.",
+        "A Client Component is needed when a component uses state, effects, event handlers, or browser-only APIs. You opt in by adding the 'use client' directive at the top of the file.",
 
       code: {
         language: "tsx",
@@ -203,7 +203,7 @@ Client Component
     {
       title: "When to Use 'use client'?",
       content:
-        "Use 'use client' only when the component needs client-side features such as state, effects, event handlers, or browser APIs.",
+        "Add 'use client' only when a component actually needs client-side features. Everything that component imports also becomes part of the client bundle, so it's best to push the 'use client' boundary as far down the tree as you can.",
 
       code: {
         language: "tsx",
@@ -211,14 +211,22 @@ Client Component
 
 import { useState } from "react";
 
-const [open, setOpen] = useState(false);`,
+export default function Toggle() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <button onClick={() => setOpen(!open)}>
+      {open ? "Hide" : "Show"}
+    </button>
+  );
+}`,
       },
     },
 
     {
       title: "Data Fetching",
       content:
-        "Next.js Server Components can fetch data directly on the server. This avoids unnecessary client-side API requests for server-rendered data.",
+        "Server Components can fetch data directly during rendering, on the server, by using async/await inside the component. The browser never has to make a separate API call to get that data.",
 
       code: {
         language: "tsx",
@@ -237,7 +245,7 @@ const [open, setOpen] = useState(false);`,
     {
       title: "Dynamic Data Fetching",
       content:
-        "For frequently changing data, configure the request or use the appropriate caching/revalidation strategy.",
+        "When data changes often and you need a fresh value on every request, pass cache: \"no-store\" to fetch. This skips the cache and makes that request run again for every visit.",
 
       code: {
         language: "tsx",
@@ -253,7 +261,7 @@ const [open, setOpen] = useState(false);`,
     {
       title: "Caching",
       content:
-        "Next.js can cache data and rendered results depending on the request and configuration. Caching can reduce repeated work and improve performance.",
+        "Next.js can cache fetch results and rendered pages so the same work isn't repeated on every request. You control this with options on fetch, such as cache and revalidate; the exact defaults have changed across versions, so it's safest to set them explicitly rather than rely on them.",
 
       code: {
         language: "tsx",
@@ -268,7 +276,7 @@ const [open, setOpen] = useState(false);`,
     {
       title: "Static Rendering",
       content:
-        "Static rendering generates content ahead of time. It is useful for pages whose data does not need to change on every request.",
+        "Static rendering builds a page's HTML ahead of time, usually at build time, and reuses that same HTML for every visitor. It's a good fit for pages whose content doesn't need to change on every request.",
 
       code: {
         language: "text",
@@ -283,7 +291,7 @@ Serve cached/static result`,
     {
       title: "Dynamic Rendering",
       content:
-        "Dynamic rendering generates content when a request is made. It is useful when the response depends on request-specific or frequently changing data.",
+        "Dynamic rendering renders a page on the server for every incoming request. Next.js switches a route to dynamic rendering automatically when it reads things like cookies, headers, or searchParams, or makes an uncached fetch call.",
 
       code: {
         language: "text",
@@ -298,7 +306,7 @@ Generate response`,
     {
       title: "ISR",
       content:
-        "Incremental Static Regeneration allows statically generated content to be updated after a specific period without rebuilding the entire application.",
+        "Incremental Static Regeneration (ISR) lets a statically generated page be refreshed after it goes stale, without rebuilding the whole site. You can set a time-based revalidate period, or trigger an update on demand after data changes.",
 
       code: {
         language: "tsx",
@@ -311,9 +319,26 @@ Generate response`,
     },
 
     {
+      title: "generateStaticParams",
+      content:
+        "generateStaticParams runs at build time to tell Next.js which values of a dynamic segment to pre-render, similar to getStaticPaths in the older Pages Router. Any value it doesn't list is rendered the first time it's requested.",
+
+      code: {
+        language: "tsx",
+        code: `export async function generateStaticParams() {
+  const jobs = await getJobs();
+
+  return jobs.map((job) => ({
+    id: job.id,
+  }));
+}`,
+      },
+    },
+
+    {
       title: "Route Handlers",
       content:
-        "Route Handlers allow you to create backend HTTP endpoints inside the app directory.",
+        "Route Handlers let you build backend HTTP endpoints inside the app directory, using a route.ts file. They use the standard Web Request and Response APIs.",
 
       code: {
         language: "tsx",
@@ -330,7 +355,7 @@ export async function GET() {
     {
       title: "POST Route Handler",
       content:
-        "Route Handlers can handle different HTTP methods such as GET, POST, PATCH, and DELETE.",
+        "A single route.ts file can export a separate function for each HTTP method it supports, such as GET, POST, PUT, PATCH, and DELETE. Next.js calls whichever function matches the incoming request's method.",
 
       code: {
         language: "tsx",
@@ -348,7 +373,7 @@ export async function GET() {
     {
       title: "Middleware",
       content:
-        "Middleware runs before a request is completed. It can be used for authentication checks, redirects, rewrites, and request processing.",
+        "Middleware code, defined in a middleware.ts file at the project root, runs before a request reaches a route. It's commonly used for auth checks, redirects, rewrites, and reading or setting cookies and headers. A matcher config controls which paths it runs on.",
 
       code: {
         language: "tsx",
@@ -371,7 +396,7 @@ export function middleware(request) {
     {
       title: "Authentication",
       content:
-        "Authentication can be implemented using cookies, sessions, JWTs, or authentication libraries. Server-side checks should protect private resources.",
+        "Authentication is usually built with cookies, sessions, JWTs, or a library such as NextAuth/Auth.js. Always verify the user on the server before returning protected data or rendering a protected page, since client-side checks alone can be bypassed.",
 
       code: {
         language: "text",
@@ -392,7 +417,7 @@ Access protected resource`,
     {
       title: "Cookies",
       content:
-        "Cookies can store session information and are automatically sent with matching requests. HttpOnly cookies help prevent JavaScript from accessing sensitive session values.",
+        "Cookies can store session information and are sent automatically with matching requests. HttpOnly cookies can't be read by client-side JavaScript, which helps keep session values safer from XSS attacks.",
 
       code: {
         language: "tsx",
@@ -407,7 +432,7 @@ Access protected resource`,
     {
       title: "Loading UI",
       content:
-        "loading.tsx can provide a loading UI while a route segment is loading.",
+        "A loading.tsx file automatically wraps its route segment in a React Suspense boundary and shows fallback UI while that segment's data is loading.",
 
       code: {
         language: "tsx",
@@ -422,7 +447,7 @@ export default function Loading() {
     {
       title: "Error Handling",
       content:
-        "error.tsx can provide a UI for handling errors in a route segment.",
+        "error.tsx defines the error UI for a route segment, and it must be a Client Component. It receives the thrown error and a reset function you can call to try rendering that segment again.",
 
       code: {
         language: "tsx",
@@ -443,7 +468,7 @@ export default function Error({
     {
       title: "not-found",
       content:
-        "not-found.tsx is used to display a custom 404 UI for resources that cannot be found.",
+        "not-found.tsx shows a custom 404 UI. Next.js renders it automatically for unmatched routes, or you can trigger it yourself by calling the notFound() function from a Server Component.",
 
       code: {
         language: "tsx",
@@ -472,12 +497,13 @@ if (!job) {
     {
       title: "Dynamic Metadata",
       content:
-        "Metadata can also be generated dynamically based on route data.",
+        "generateMetadata builds metadata dynamically from route data, such as params or a fetched resource. Like a page's params prop, the params argument here is a promise, so it needs to be awaited.",
 
       code: {
         language: "tsx",
         code: `export async function generateMetadata({ params }) {
-  const job = await getJob(params.id);
+  const { id } = await params;
+  const job = await getJob(id);
 
   return {
     title: job.title,
@@ -508,7 +534,7 @@ if (!job) {
     {
       title: "Link Component",
       content:
-        "The Link component provides client-side navigation between routes and can improve navigation performance.",
+        "The Link component provides client-side navigation between routes and automatically prefetches linked pages in the background, which makes navigating between them feel faster.",
 
       code: {
         language: "tsx",
@@ -523,7 +549,7 @@ if (!job) {
     {
       title: "Redirect",
       content:
-        "Next.js provides redirect utilities for navigating users from the server.",
+        "The redirect function stops rendering and sends the user to a new route. It works inside Server Components, Route Handlers, and Server Actions.",
 
       code: {
         language: "tsx",
@@ -538,7 +564,7 @@ if (!user) {
     {
       title: "Parallel Routes",
       content:
-        "Parallel Routes allow multiple pages or UI sections to be rendered within the same layout simultaneously.",
+        "Parallel Routes let you render two or more pages in the same layout at once, using named slots like @analytics and @jobs, which are passed to the layout as props. Each slot can load, error, and navigate on its own.",
 
       code: {
         language: "text",
@@ -552,7 +578,7 @@ if (!user) {
     {
       title: "Intercepting Routes",
       content:
-        "Intercepting Routes allow a route to be displayed within the current layout, commonly used for modal-based navigation.",
+        "Intercepting Routes let you open a route inside the current layout, like a modal, while keeping the real URL for that route. Folder names like (.) and (..) control how many segments up the interception looks, and this pattern is often combined with Parallel Routes.",
 
       code: {
         language: "text",
@@ -567,7 +593,7 @@ Open Post as Modal`,
     {
       title: "Server Actions",
       content:
-        "Server Actions allow server-side functions to be called from forms or client interactions without manually creating a separate API endpoint for every action.",
+        "Server Actions are async functions marked with 'use server' that run only on the server. You can call them from a form's action prop or from a client-side event handler, without writing a separate API route for every action.",
 
       code: {
         language: "tsx",
@@ -595,6 +621,24 @@ Caching
 Pagination
 Lazy loading
 Less client JS`,
+      },
+    },
+
+    {
+      title: "App Router vs Pages Router",
+      content:
+        "Next.js has two routing systems. The older Pages Router uses a pages folder with data methods like getStaticProps and getServerSideProps. The newer App Router uses an app folder, Server Components by default, and async/await for data fetching. The App Router is the current recommended approach, but the Pages Router is still supported.",
+
+      code: {
+        language: "text",
+        code: `Pages Router
+ └── pages/
+      └── jobs.tsx
+
+App Router
+ └── app/
+      └── jobs/
+           └── page.tsx`,
       },
     },
 
