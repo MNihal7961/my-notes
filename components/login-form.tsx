@@ -2,6 +2,7 @@
 
 import { useEffect, useActionState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { login, type LoginState } from "@/lib/actions/auth";
 
 const initialState: LoginState = { error: null, success: false };
@@ -11,11 +12,15 @@ export function LoginForm({ next }: { next: string }) {
   const router = useRouter();
 
   useEffect(() => {
-    if (!state.success) return;
-    router.push(next.startsWith("/") ? next : "/");
-    router.refresh();
+    if (state.success) {
+      toast.success("Signed in successfully.");
+      router.push(next.startsWith("/") ? next : "/");
+      router.refresh();
+    } else if (state.error) {
+      toast.error(state.error);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.success]);
+  }, [state]);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
@@ -46,10 +51,6 @@ export function LoginForm({ next }: { next: string }) {
           className="rounded-lg border border-black/10 bg-white px-3.5 py-2.5 text-sm text-zinc-900 outline-none focus:border-zinc-400 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:border-zinc-600"
         />
       </div>
-
-      {state.error && (
-        <p className="text-sm font-medium text-red-600 dark:text-red-400">{state.error}</p>
-      )}
 
       <button
         type="submit"
