@@ -16,6 +16,7 @@ export const mongodbNotes: NoteData = {
     "Aggregation",
     "Relationships",
     "Transactions",
+    "Replication & Sharding",
     "Schema Design",
     "Performance",
     "MongoDB with Node.js",
@@ -25,7 +26,7 @@ export const mongodbNotes: NoteData = {
     {
       title: "What is MongoDB?",
       content:
-        "MongoDB is a NoSQL document database. It stores data as BSON documents instead of rows and tables.",
+        "MongoDB is a NoSQL document database. Instead of storing data in rows and tables like SQL, it stores each record as a BSON document inside a collection.",
 
       code: {
         language: "json",
@@ -55,7 +56,7 @@ Document`,
     {
       title: "MongoDB Document",
       content:
-        "MongoDB documents are JSON-like objects. MongoDB actually stores them internally as BSON.",
+        "MongoDB documents are JSON-like objects made of key-value pairs. MongoDB stores them internally as BSON, so a document can hold nested objects and arrays, and different documents in the same collection don't need to have the same fields.",
 
       code: {
         language: "json",
@@ -75,7 +76,7 @@ Document`,
     {
       title: "BSON",
       content:
-        "BSON means Binary JSON. MongoDB uses BSON because it supports additional data types and is efficient for storing and processing documents.",
+        "BSON stands for Binary JSON. It's a binary-encoded format, so MongoDB can scan and parse it faster than plain text JSON. It also supports extra data types that JSON doesn't have, like Date and ObjectId.",
 
       code: {
         language: "text",
@@ -111,7 +112,7 @@ db.users.deleteOne({ name: "Nihal" });`,
     {
       title: "find()",
       content:
-        "find() is used to retrieve multiple documents that match a condition.",
+        "find() returns all documents that match a condition, as a cursor. You can chain methods like sort(), skip(), and limit() onto the result.",
 
       code: {
         language: "javascript",
@@ -124,7 +125,7 @@ db.users.deleteOne({ name: "Nihal" });`,
     {
       title: "findOne()",
       content:
-        "findOne() returns a single matching document.",
+        "findOne() returns the first document that matches a condition, or null if nothing matches.",
 
       code: {
         language: "javascript",
@@ -156,7 +157,7 @@ db.users.insertMany([
     {
       title: "Update Documents",
       content:
-        "updateOne() updates the first matching document. updateMany() updates all matching documents.",
+        "updateOne() updates the first matching document. updateMany() updates all matching documents. Both need an update operator like $set — without one, MongoDB would try to replace the whole document.",
 
       code: {
         language: "javascript",
@@ -187,25 +188,22 @@ db.users.insertMany([
     {
       title: "Query Operators",
       content:
-        "MongoDB provides operators for filtering documents based on conditions.",
+        "MongoDB provides comparison operators for filtering documents: $eq, $ne, $gt, $gte, $lt, $lte for comparisons, and $in / $nin to match against a list of values.",
 
       code: {
         language: "javascript",
-        code: `$eq  → Equal
-$ne  → Not equal
-$gt  → Greater than
-$gte → Greater than or equal
-$lt  → Less than
-$lte → Less than or equal
-$in  → Match values
-$nin → Not in values`,
+        code: `db.users.find({
+  age: { $gte: 18, $lte: 30 },
+  role: { $in: ["admin", "manager"] },
+  status: { $ne: "banned" }
+});`,
       },
     },
 
     {
       title: "Logical Operators",
       content:
-        "Logical operators allow multiple conditions to be combined.",
+        "Logical operators combine multiple conditions in a query. The main ones are $and, $or, $not, and $nor.",
 
       code: {
         language: "javascript",
@@ -228,7 +226,7 @@ db.users.find({
     {
       title: "Projection",
       content:
-        "Projection allows us to return only the fields we need instead of the complete document.",
+        "Projection lets you choose which fields to return instead of the whole document. Use 1 to include a field and 0 to exclude it — the _id field is returned by default unless you explicitly set it to 0.",
 
       code: {
         language: "javascript",
@@ -236,7 +234,8 @@ db.users.find({
   { active: true },
   {
     name: 1,
-    email: 1
+    email: 1,
+    _id: 0
   }
 );`,
       },
@@ -258,7 +257,7 @@ db.users.find({
     {
       title: "Pagination",
       content:
-        "Pagination avoids returning a large number of documents at once. skip() and limit() can be used for basic pagination.",
+        "Pagination avoids returning a large number of documents at once. skip() and limit() work fine for basic pagination, but skip() gets slow on large offsets because MongoDB still has to walk past every skipped document. For big collections, cursor-based pagination using a field like _id is faster.",
 
       code: {
         language: "javascript",
@@ -272,7 +271,7 @@ db.users.find({
     {
       title: "What is an Index?",
       content:
-        "An index helps MongoDB find documents faster without scanning the entire collection.",
+        "An index helps MongoDB find documents faster without scanning the entire collection. Every collection already has a default index on _id, and you can create more with createIndex().",
 
       code: {
         language: "javascript",
@@ -285,7 +284,7 @@ db.users.find({
     {
       title: "Why are Indexes Important?",
       content:
-        "Without an appropriate index, MongoDB may scan many documents. An index can make frequently used queries much faster.",
+        "Without the right index, MongoDB has to scan every document in the collection to find matches, which is slow. Indexes make reads much faster, but they add overhead to writes since MongoDB has to update the index too — so don't create more indexes than you actually need.",
 
       code: {
         language: "text",
@@ -300,7 +299,7 @@ Query → Index → Matching documents`,
     {
       title: "Compound Index",
       content:
-        "A compound index contains multiple fields. It is useful when queries commonly filter or sort using those fields together.",
+        "A compound index covers multiple fields in one index. Field order matters — put fields used for exact matches first, then fields used for sorting or ranges — so queries that filter and sort using those fields together can use the index efficiently.",
 
       code: {
         language: "javascript",
@@ -353,7 +352,7 @@ IXSCAN    → Index scan`,
     {
       title: "Aggregation",
       content:
-        "Aggregation is used to process and transform documents through multiple stages.",
+        "The aggregation pipeline processes documents through a sequence of stages, where each stage's output feeds into the next stage — for example, $match to filter documents, then $group to summarize them.",
 
       code: {
         language: "javascript",
@@ -370,7 +369,7 @@ IXSCAN    → Index scan`,
     {
       title: "$match",
       content:
-        "$match filters documents in an aggregation pipeline.",
+        "$match filters documents in an aggregation pipeline, similar to find(). Put it early in the pipeline so later stages have fewer documents to process.",
 
       code: {
         language: "javascript",
@@ -385,7 +384,7 @@ IXSCAN    → Index scan`,
     {
       title: "$group",
       content:
-        "$group groups documents based on a field and can calculate values such as count, sum, and average.",
+        "$group groups documents by whatever field you put in _id, and can calculate values per group using accumulators like $sum for totals or counts, $avg for averages, and $max or $min for extremes.",
 
       code: {
         language: "javascript",
@@ -494,22 +493,57 @@ User → addressId → Address`,
     {
       title: "MongoDB Transactions",
       content:
-        "Transactions allow multiple database operations to succeed or fail together. They are useful when multiple changes must remain consistent.",
+        "Transactions let multiple operations succeed or fail together, so your data stays consistent if one step fails partway through. They only work on a replica set or sharded cluster (not on a single standalone server), and they're slower than normal writes, so use them only when you really need atomicity across multiple documents.",
 
       code: {
         language: "javascript",
         code: `const session = await mongoose.startSession();
 
-session.startTransaction();
-
 try {
-  await createOrder({ session });
-  await updateStock({ session });
+  session.startTransaction();
+
+  await Order.create([{ userId, total }], { session });
+  await Stock.updateOne(
+    { productId },
+    { $inc: { qty: -1 } },
+    { session }
+  );
 
   await session.commitTransaction();
 } catch (error) {
   await session.abortTransaction();
+} finally {
+  session.endSession();
 }`,
+      },
+    },
+
+    {
+      title: "Replica Sets",
+      content:
+        "A replica set is a group of MongoDB servers that keep the same data in sync. One server is the primary and handles all writes, while the others are secondaries that replicate data from it. If the primary goes down, the replica set automatically elects a new primary, so the database stays available.",
+
+      code: {
+        language: "text",
+        code: `Primary    → accepts writes
+Secondary  → replicates from primary
+Secondary  → replicates from primary
+
+Primary goes down → automatic election → new primary`,
+      },
+    },
+
+    {
+      title: "Sharding",
+      content:
+        "Sharding splits a large collection across multiple servers, called shards, based on a shard key. Each shard holds part of the data, so reads and writes spread across machines instead of hitting one server. This is how MongoDB scales horizontally for very large datasets.",
+
+      code: {
+        language: "text",
+        code: `Collection
+ ├── Shard 1 (shard key range A)
+ ├── Shard 2 (shard key range B)
+ └── Shard 3 (shard key range C)`,
       },
     },
 
@@ -550,7 +584,7 @@ const User = mongoose.model(
     {
       title: "Mongoose Schema vs Model",
       content:
-        "A schema defines the structure and rules of the data. A model is used to interact with the MongoDB collection.",
+        "A schema defines the shape of documents — field types, defaults, and validation rules. A model is built from that schema and is what you actually use to create, query, and update documents in the collection.",
 
       code: {
         language: "javascript",
@@ -614,7 +648,7 @@ db.users.findOne({
     {
       title: "ObjectId",
       content:
-        "ObjectId is the commonly used identifier type for MongoDB documents. MongoDB automatically creates an _id field if one is not provided.",
+        "ObjectId is the default type for a document's _id. It's 12 bytes, built from a timestamp, a random value, and a counter, so ObjectIds are roughly sortable by creation time. MongoDB generates one automatically if you don't provide an _id yourself.",
 
       code: {
         language: "javascript",
@@ -627,7 +661,7 @@ db.users.findOne({
     {
       title: "MongoDB Interview Checklist",
       content:
-        "Make sure you can explain documents, collections, CRUD, queries, operators, indexes, compound indexes, explain(), aggregation, $match, $group, $lookup, embedding vs referencing, transactions, Mongoose, pagination, and performance optimization.",
+        "Make sure you can explain documents, collections, CRUD, queries, operators, indexes, compound indexes, explain(), aggregation, $match, $group, $lookup, embedding vs referencing, transactions, replica sets, sharding, Mongoose, pagination, and performance optimization.",
     },
   ],
 };
