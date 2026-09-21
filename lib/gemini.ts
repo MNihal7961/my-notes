@@ -1,7 +1,10 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { ExamAnswer, ExamEvaluation, ExamQuestion, Note } from "@/lib/types";
 
-const MODEL = "gemini-2.0-flash";
+// Pinned dated models (e.g. gemini-2.0-flash, gemini-2.5-flash-lite) get
+// retired by Google on a rolling basis — this alias always resolves to the
+// current lite model so exam generation doesn't silently break again later.
+const MODEL = "gemini-flash-lite-latest";
 
 function getClient() {
   const apiKey = process.env.GEMINI_API_KEY;
