@@ -5,7 +5,7 @@ import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
 const PROTECTED_MATCHERS = [
   /^\/notes\/[^/]+\/exam(\/|$)/,
   /^\/results(\/|$)/,
-  /^\/interview(\/|$)/,
+  /^\/interview\/[^/]+/,
 ];
 
 export function proxy(request: NextRequest) {
@@ -29,5 +29,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/notes/:slug/exam/:path*", "/results/:path*", "/interview/:path*"],
+  matcher: ["/notes/:slug/exam/:path*", "/results/:path*", "/interview/:track"],
 };
