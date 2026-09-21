@@ -5,8 +5,8 @@ import { randomUUID } from "crypto";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
-import { getNoteBySlug } from "@/lib/notes";
-import { generateExamQuestions, evaluateExamAnswers } from "@/lib/gemini";
+import { getExamNote } from "@/lib/notes";
+import { generateExamQuestions, evaluateExamAnswers, type QuestionMix } from "@/lib/gemini";
 import { RESULTS_DIR } from "@/lib/exam-results";
 import type { ExamAnswer, ExamQuestion, ExamResult } from "@/lib/types";
 
@@ -17,11 +17,11 @@ async function requireSession() {
   return username;
 }
 
-export async function generateExam(slug: string): Promise<ExamQuestion[]> {
+export async function generateExam(slug: string, mix?: QuestionMix): Promise<ExamQuestion[]> {
   await requireSession();
-  const note = getNoteBySlug(slug);
+  const note = getExamNote(slug);
   if (!note) throw new Error("Note not found");
-  return generateExamQuestions(note);
+  return generateExamQuestions(note, mix);
 }
 
 export async function submitExam(
@@ -31,7 +31,7 @@ export async function submitExam(
   startedAt: string
 ): Promise<ExamResult> {
   await requireSession();
-  const note = getNoteBySlug(slug);
+  const note = getExamNote(slug);
   if (!note) throw new Error("Note not found");
 
   const evaluation = await evaluateExamAnswers(note, questions, answers);
