@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState, useSyncExternalStore } from "react";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
 
 interface MinimalSpeechRecognition extends EventTarget {
   lang: string;
@@ -10,7 +11,7 @@ interface MinimalSpeechRecognition extends EventTarget {
   stop: () => void;
   onresult: ((event: { results: { [index: number]: { [index: number]: { transcript: string } } } }) => void) | null;
   onend: (() => void) | null;
-  onerror: (() => void) | null;
+  onerror: ((event: { error: string }) => void) | null;
 }
 
 type SpeechRecognitionConstructor = new () => MinimalSpeechRecognition;
@@ -22,20 +23,7 @@ declare global {
   }
 }
 
-function subscribe() {
-  return () => {};
-}
-
-function getSnapshot() {
-  return Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
-}
-
-function getServerSnapshot() {
-  return false;
-}
-
 export function MicButton({ onResult }: { onResult: (transcript: string) => void }) {
-  const supported = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const [recording, setRecording] = useState(false);
   const recognitionRef = useRef<MinimalSpeechRecognition | null>(null);
 
@@ -47,7 +35,10 @@ export function MicButton({ onResult }: { onResult: (transcript: string) => void
     }
 
     const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!Ctor) return;
+    if (!Ctor) {
+      toast.error("Voice input isn't supported in this browser.");
+      return;
+    }
 
     const recognition = new Ctor();
     recognition.lang = "en-US";
@@ -55,17 +46,27 @@ export function MicButton({ onResult }: { onResult: (transcript: string) => void
     recognition.maxAlternatives = 1;
     recognition.onresult = (event) => {
       const transcript = event.results[0]?.[0]?.transcript;
-      if (transcript) onResult(transcript);
+      if (transcript) {
+        onResult(transcript);
+        toast.success("Answer transcribed.");
+      }
     };
     recognition.onend = () => setRecording(false);
-    recognition.onerror = () => setRecording(false);
+    recognition.onerror = (event) => {
+      setRecording(false);
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+        toast.error("Microphone access was denied.");
+      } else if (event.error === "no-speech") {
+        toast.warning("Didn't catch that — no speech detected.");
+      } else {
+        toast.error("Voice input failed. Please try again.");
+      }
+    };
 
     recognitionRef.current = recognition;
     recognition.start();
     setRecording(true);
   }
-
-  if (!supported) return null;
 
   return (
     <button
