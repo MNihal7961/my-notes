@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { submitExam } from "@/lib/actions/exam";
 import { MicButton } from "@/components/mic-button";
-import { FULL_STACK_SLUG } from "@/lib/notes";
+import { isInterviewTrackSlug } from "@/lib/notes";
 import type { ExamAnswer, ExamQuestion, ExamResult, Note } from "@/lib/types";
 
 export function ExamRunner({
@@ -15,7 +15,7 @@ export function ExamRunner({
   note: Note;
   questions: ExamQuestion[];
 }) {
-  const backHref = note.slug === FULL_STACK_SLUG ? "/" : `/notes/${note.slug}`;
+  const backHref = isInterviewTrackSlug(note.slug) ? "/" : `/notes/${note.slug}`;
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -80,7 +80,7 @@ export function ExamRunner({
             Exit
           </Link>
           <span className="hidden truncate text-sm font-semibold text-zinc-800 sm:inline dark:text-zinc-200">
-            {note.slug === FULL_STACK_SLUG ? note.title : `${note.title} — Exam`}
+            {isInterviewTrackSlug(note.slug) ? note.title : `${note.title} — Exam`}
           </span>
           <span className="ml-auto text-sm font-medium text-zinc-500 dark:text-zinc-400">
             {index + 1} / {total}
@@ -223,8 +223,8 @@ export function ExamRunner({
 }
 
 function ExamResultView({ note, result }: { note: Note; result: ExamResult }) {
-  const backHref = note.slug === FULL_STACK_SLUG ? "/" : `/notes/${note.slug}`;
-  const backLabel = note.slug === FULL_STACK_SLUG ? "Back home" : "Back to note";
+  const backHref = isInterviewTrackSlug(note.slug) ? "/" : `/notes/${note.slug}`;
+  const backLabel = isInterviewTrackSlug(note.slug) ? "Back home" : "Back to note";
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col overflow-y-auto px-4 py-10 sm:px-6">
