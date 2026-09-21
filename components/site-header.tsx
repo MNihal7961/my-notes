@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LogoutButton } from "@/components/logout-button";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
-import { logout } from "@/lib/actions/auth";
 
 export async function SiteHeader() {
   const cookieStore = await cookies();
