@@ -2,8 +2,13 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 
-function subscribe() {
-  return () => {};
+function subscribe(callback: () => void) {
+  const observer = new MutationObserver(callback);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+  return () => observer.disconnect();
 }
 
 function getSnapshot() {
