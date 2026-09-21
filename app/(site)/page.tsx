@@ -1,5 +1,6 @@
 import { getAllNotes } from "@/lib/notes";
 import { NoteCard } from "@/components/note-card";
+import { InterviewBanner } from "@/components/interview-banner";
 
 export default function Home() {
   const notes = getAllNotes();
@@ -7,6 +8,8 @@ export default function Home() {
   return (
     <div className="flex flex-1 flex-col">
       <section className="mx-auto w-full max-w-6xl flex-1 px-4 py-14 sm:px-6 lg:px-8">
+        <InterviewBanner topicCount={notes.length} />
+
         <div className="mb-8 flex items-end justify-between">
           <h2 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
             All notes
