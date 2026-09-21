@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
 
-const PROTECTED_MATCHERS = [/^\/notes\/[^/]+\/exam(\/|$)/, /^\/results(\/|$)/];
+const PROTECTED_MATCHERS = [
+  /^\/notes\/[^/]+\/exam(\/|$)/,
+  /^\/results(\/|$)/,
+  /^\/interview(\/|$)/,
+];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -25,5 +29,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/notes/:slug/exam/:path*", "/results/:path*"],
+  matcher: ["/notes/:slug/exam/:path*", "/results/:path*", "/interview/:path*"],
 };
