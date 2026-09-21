@@ -18,7 +18,7 @@ export const nextjsNotes: NoteData = {
     "Rendering",
     "Caching",
     "API Routes",
-    "Middleware",
+    "Middleware / Proxy",
     "Authentication",
     "Performance",
     "SEO",
@@ -371,15 +371,16 @@ export async function GET() {
     },
 
     {
-      title: "Middleware",
+      title: "Middleware (now Proxy)",
       content:
-        "Middleware code, defined in a middleware.ts file at the project root, runs before a request reaches a route. It's commonly used for auth checks, redirects, rewrites, and reading or setting cookies and headers. A matcher config controls which paths it runs on.",
+        "This code runs before a request reaches a route. It's commonly used for auth checks, redirects, rewrites, and reading or setting cookies and headers. A matcher config controls which paths it runs on.\n\nIn Next.js 16, the middleware.ts file convention was renamed to proxy.ts — same behavior, just a new file and function name. Older codebases and tutorials will still say \"middleware\", so know both names.",
 
       code: {
         language: "tsx",
-        code: `import { NextResponse } from "next/server";
+        code: `// proxy.ts
+import { NextResponse } from "next/server";
 
-export function middleware(request) {
+export function proxy(request) {
   const token = request.cookies.get("token");
 
   if (!token) {
