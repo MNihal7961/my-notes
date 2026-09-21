@@ -25,7 +25,7 @@ export const nodejsNotes: NoteData = {
     {
       title: "What is Node.js?",
       content:
-        "Node.js is a JavaScript runtime that allows us to run JavaScript outside the browser. It is mainly used for building backend APIs and server-side applications.",
+        "Node.js is a JavaScript runtime that lets you run JavaScript outside the browser, for example on a server. It is built on Google's V8 engine and is mainly used to build backend APIs and server-side apps.",
 
       code: {
         language: "javascript",
@@ -36,7 +36,7 @@ export const nodejsNotes: NoteData = {
     {
       title: "Node.js Architecture",
       content:
-        "Node.js uses the V8 engine to execute JavaScript. It uses libuv to handle asynchronous operations and the event loop.",
+        "Node.js runs JavaScript using the V8 engine, the same engine Chrome uses. It also uses a library called libuv, which handles the event loop and async work like file access and network calls.",
 
       code: {
         language: "text",
@@ -55,7 +55,7 @@ Async I/O`,
     {
       title: "Why Node.js?",
       content:
-        "Node.js is useful for applications that handle many concurrent requests, especially APIs and real-time applications. It uses non-blocking I/O, so one slow operation does not block other requests.",
+        "Node.js is a good fit for apps that handle many requests at once, like APIs and real-time apps. It uses non-blocking I/O, so a slow operation, like a database call, does not stop other requests from being handled.",
 
       code: {
         language: "javascript",
@@ -69,7 +69,7 @@ Async I/O`,
     {
       title: "Node.js Event Loop",
       content:
-        "The event loop allows Node.js to handle asynchronous operations without blocking the main JavaScript thread. When an async operation completes, its callback is executed when the call stack is available.",
+        "The event loop lets Node.js handle many things at once without blocking the main thread. When an async task, like a timer or a file read, finishes, its callback is queued up and runs once the currently running code is done.",
 
       code: {
         language: "javascript",
@@ -89,9 +89,32 @@ console.log("3");
     },
 
     {
+      title: "Microtasks vs Macrotasks",
+      content:
+        "Promises (and queueMicrotask) go into the microtask queue. Timers like setTimeout go into the macrotask queue. Node.js always finishes all pending microtasks before moving on to the next macrotask, so a resolved Promise usually runs before a setTimeout callback, even one with a 0ms delay.",
+
+      code: {
+        language: "javascript",
+        code: `console.log("1");
+
+setTimeout(() => console.log("2"), 0);
+
+Promise.resolve().then(() => console.log("3"));
+
+console.log("4");
+
+// Output:
+// 1
+// 4
+// 3
+// 2`,
+      },
+    },
+
+    {
       title: "Blocking vs Non-Blocking",
       content:
-        "Blocking code waits until an operation finishes. Non-blocking code starts the operation and allows Node.js to continue executing other work.",
+        "Blocking code stops everything until an operation finishes. Non-blocking code starts the operation and lets Node.js keep doing other work while it waits.",
 
       code: {
         language: "javascript",
@@ -107,7 +130,7 @@ console.log("Continue");`,
     {
       title: "Callbacks",
       content:
-        "A callback is a function passed to another function and executed later, usually after an asynchronous operation completes.",
+        "A callback is a function you pass into another function, to be run later, usually after an async operation finishes. This works fine for one or two calls, but nesting many callbacks inside each other gets hard to read, a problem often called callback hell.",
 
       code: {
         language: "javascript",
@@ -125,7 +148,7 @@ console.log("Continue");`,
     {
       title: "Promises in Node.js",
       content:
-        "A Promise represents the future result of an asynchronous operation. It can be pending, fulfilled, or rejected.",
+        "A Promise stands in for a value that isn't ready yet. It starts out pending, and then settles as either fulfilled (success) or rejected (failure).",
 
       code: {
         language: "javascript",
@@ -140,7 +163,7 @@ result
     {
       title: "Async / Await",
       content:
-        "async/await makes Promise-based code easier to read. await pauses that async function until the Promise is resolved or rejected.",
+        "async/await is a cleaner way to write Promise-based code. Inside an async function, await pauses that function until the Promise resolves or rejects, without blocking the rest of the app.",
 
       code: {
         language: "javascript",
@@ -158,7 +181,7 @@ result
     {
       title: "Promise.all()",
       content:
-        "Promise.all() runs multiple independent Promises together. It succeeds only when all Promises succeed. If one fails, the whole Promise.all() rejects.",
+        "Promise.all() runs multiple independent Promises at the same time and waits for all of them. It resolves only when every Promise succeeds. If even one fails, the whole Promise.all() rejects right away.",
 
       code: {
         language: "javascript",
@@ -172,7 +195,7 @@ result
     {
       title: "Promise.allSettled()",
       content:
-        "Promise.allSettled() waits for every Promise, even if some fail. It gives the status and result of each operation.",
+        "Promise.allSettled() also runs multiple Promises together, but it waits for all of them to finish no matter what. It gives you the status and result (or error) of each one, instead of stopping at the first failure.",
 
       code: {
         language: "javascript",
@@ -186,7 +209,7 @@ result
     {
       title: "Node.js Modules",
       content:
-        "Modules allow us to split code into separate files. Node.js supports CommonJS and ES Modules.",
+        "Modules let you split your code into separate files and reuse pieces of it. Node.js supports two module systems: CommonJS, the original one, and ES Modules, the modern JavaScript standard.",
 
       code: {
         language: "javascript",
@@ -201,7 +224,7 @@ import express from "express";`,
     {
       title: "CommonJS vs ES Modules",
       content:
-        "CommonJS uses require() and module.exports. ES Modules use import and export.",
+        "CommonJS uses require() to import and module.exports to export. ES Modules use the import and export keywords. To use ES Modules in Node.js, you usually set \"type\": \"module\" in package.json.",
 
       code: {
         language: "javascript",
@@ -218,7 +241,7 @@ import user from "./user";`,
     {
       title: "npm",
       content:
-        "npm is the package manager commonly used with Node.js. It is used to install, manage, and publish packages.",
+        "npm (Node Package Manager) is the tool most people use to install and manage packages in a Node.js project. It comes bundled with Node.js and also lets you run scripts and publish your own packages.",
 
       code: {
         language: "bash",
@@ -231,7 +254,7 @@ npm run dev`,
     {
       title: "package.json",
       content:
-        "package.json contains information about the project, dependencies, scripts, and other configuration.",
+        "package.json holds information about your project: its name, version, dependencies, and scripts you can run. Almost every Node.js project has one at its root folder.",
 
       code: {
         language: "json",
@@ -247,7 +270,7 @@ npm run dev`,
     {
       title: "Environment Variables",
       content:
-        "Environment variables are used to store configuration values such as database URLs, API keys, and secrets.",
+        "Environment variables store config values outside your code, like database URLs, API keys, and secrets. Node.js reads them from process.env, and a package like dotenv can load them from a .env file during development.",
 
       code: {
         language: "javascript",
@@ -259,7 +282,7 @@ const dbUrl = process.env.DATABASE_URL;`,
     {
       title: "Express.js",
       content:
-        "Express.js is a popular Node.js framework used to build web servers and REST APIs.",
+        "Express.js is the most popular Node.js framework for building web servers and REST APIs. It takes care of routing, requests, and responses so you don't have to handle raw HTTP yourself.",
 
       code: {
         language: "javascript",
@@ -278,7 +301,7 @@ app.listen(3000);`,
     {
       title: "Middleware",
       content:
-        "Middleware is a function that runs between the request and the final response. It can be used for authentication, logging, validation, and more.",
+        "Middleware is a function that runs between the incoming request and the final response. It's used for things like authentication, logging, and validating input. Middleware must call next() to pass control on, otherwise the request just hangs.",
 
       code: {
         language: "javascript",
@@ -292,7 +315,7 @@ app.listen(3000);`,
     {
       title: "Request and Response",
       content:
-        "req contains information about the incoming request. res is used to send a response back to the client.",
+        "req holds information about the incoming request, like params, query, and body. res is used to send data back to the client, for example with res.json() or res.status().",
 
       code: {
         language: "javascript",
@@ -307,12 +330,13 @@ app.listen(3000);`,
     {
       title: "REST API",
       content:
-        "A REST API allows the frontend and backend to communicate using HTTP methods such as GET, POST, PATCH, and DELETE.",
+        "A REST API lets the frontend and backend talk over HTTP. Each resource gets its own URL, and you use HTTP methods like GET, POST, PUT/PATCH, and DELETE to read, create, update, and delete data.",
 
       code: {
         language: "http",
         code: `GET    /users
 POST   /users
+PUT    /users/:id
 PATCH  /users/:id
 DELETE /users/:id`,
       },
@@ -321,7 +345,7 @@ DELETE /users/:id`,
     {
       title: "HTTP Status Codes",
       content:
-        "Status codes tell the client what happened with the request.",
+        "Status codes tell the client what happened with a request. As a rule of thumb: 2xx means success, 4xx means the client made a mistake, and 5xx means something went wrong on the server.",
 
       code: {
         language: "text",
@@ -338,12 +362,17 @@ DELETE /users/:id`,
     {
       title: "JWT Authentication",
       content:
-        "JWT is commonly used for authentication. After login, the server generates a token and the client sends that token with future requests.",
+        "JWT (JSON Web Token) is commonly used for stateless authentication. After login, the server signs a token and sends it to the client. The client sends that token with future requests, and the server verifies it instead of looking up a session in a database.",
 
       code: {
         language: "javascript",
         code: `const token = jwt.sign(
   { sub: user.id },
+  process.env.JWT_SECRET
+);
+
+const payload = jwt.verify(
+  token,
   process.env.JWT_SECRET
 );`,
       },
@@ -364,7 +393,7 @@ Authorization  → What can you access?`,
     {
       title: "Password Hashing",
       content:
-        "Passwords should never be stored as plain text. Libraries such as bcrypt can hash passwords before storing them.",
+        "Never store passwords as plain text. Use a library like bcrypt to hash the password before saving it, and compare hashes at login instead of comparing raw passwords.",
 
       code: {
         language: "javascript",
@@ -383,7 +412,7 @@ const valid = await bcrypt.compare(
     {
       title: "Error Handling",
       content:
-        "Errors should be handled properly so the API can return meaningful responses instead of crashing unexpectedly.",
+        "Handle errors properly so your API can send back a clear response instead of crashing. Wrap risky code in try/catch, and always send a proper status code with a useful error message.",
 
       code: {
         language: "javascript",
@@ -400,7 +429,7 @@ const valid = await bcrypt.compare(
     {
       title: "Global Error Handler",
       content:
-        "In Express, a global error middleware can handle errors from different routes in one place.",
+        "In Express, you can add one error-handling middleware at the end of your file to catch errors from any route in one place. It takes four arguments, (err, req, res, next), which is how Express knows it's an error handler and not regular middleware.",
 
       code: {
         language: "javascript",
@@ -415,7 +444,7 @@ const valid = await bcrypt.compare(
     {
       title: "Database Connection",
       content:
-        "Node.js applications commonly connect to databases such as MongoDB, PostgreSQL, or MySQL using database drivers or ORMs.",
+        "Node.js apps commonly connect to databases like MongoDB, PostgreSQL, or MySQL, using a database driver or an ORM/ODM such as Mongoose or Prisma.",
 
       code: {
         language: "javascript",
@@ -428,7 +457,7 @@ const valid = await bcrypt.compare(
     {
       title: "Database Indexing",
       content:
-        "Indexes improve query performance by allowing the database to find data faster instead of scanning every document.",
+        "An index helps the database find data faster, instead of scanning every row or document. Indexes speed up reads, but they take up extra storage and slow down writes a little, since each index has to be updated too.",
 
       code: {
         language: "javascript",
@@ -441,7 +470,7 @@ const valid = await bcrypt.compare(
     {
       title: "Caching with Redis",
       content:
-        "Redis can store frequently requested data in memory. This can reduce database calls and improve response time.",
+        "Redis is an in-memory data store, often used as a cache. It can store frequently requested data in memory so you don't have to hit the main database every time, which speeds up response times.",
 
       code: {
         language: "javascript",
@@ -456,7 +485,7 @@ if (cached) {
     {
       title: "Scaling Node.js",
       content:
-        "A Node.js process mainly runs JavaScript on a single thread. For CPU-heavy workloads or multiple CPU cores, Node.js can use worker threads or multiple processes.",
+        "A Node.js process runs your JavaScript on a single thread. To use more CPU cores, you can run multiple processes with the cluster module, or use worker threads for CPU-heavy tasks so they don't block the main thread.",
 
       code: {
         language: "javascript",
@@ -467,6 +496,23 @@ if (cluster.isPrimary) {
 } else {
   startServer();
 }`,
+      },
+    },
+
+    {
+      title: "Cluster vs Worker Threads",
+      content:
+        "The cluster module forks multiple copies of your whole Node.js process, each with its own event loop, so you can handle more incoming requests across CPU cores. Worker threads run JavaScript in a separate thread inside the same process and can share memory, which makes them better suited for CPU-heavy work like image processing or big calculations.",
+
+      code: {
+        language: "javascript",
+        code: `import { Worker } from "node:worker_threads";
+
+const worker = new Worker("./heavy-task.js");
+
+worker.on("message", (result) => {
+  console.log(result);
+});`,
       },
     },
 
@@ -488,7 +534,7 @@ stream.pipe(res);`,
     {
       title: "Buffer",
       content:
-        "Buffer is used to work with binary data in Node.js, such as files, images, and network data.",
+        "Buffer is used to work with raw binary data in Node.js, such as files, images, and network data. It's like a fixed-size array of bytes that lives outside the regular JavaScript heap.",
 
       code: {
         language: "javascript",
@@ -520,7 +566,7 @@ emitter.emit("userCreated");`,
     {
       title: "Node.js Security Basics",
       content:
-        "Validate input, hash passwords, protect secrets, use authentication and authorization, rate-limit APIs, and avoid trusting client input.",
+        "Always validate and sanitize user input. Hash passwords before storing them, and keep secrets like API keys out of your code by using environment variables. Use HTTPS in production, add rate limiting to prevent abuse, and never trust data coming from the client.",
 
       code: {
         language: "text",
@@ -537,7 +583,7 @@ Rate limiting`,
     {
       title: "Node.js Interview Checklist",
       content:
-        "Before the interview, make sure you can explain these topics clearly: Node.js runtime, event loop, non-blocking I/O, callbacks, Promises, async/await, Express, middleware, REST APIs, JWT, error handling, databases, Redis, streams, and scaling.",
+        "Before the interview, make sure you can clearly explain: the Node.js runtime and event loop, non-blocking I/O, callbacks, Promises, and async/await. Also review Express, middleware, REST APIs, JWT auth, error handling, databases, Redis caching, streams, and scaling with cluster and worker threads.",
     },
   ],
 };
