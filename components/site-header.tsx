@@ -28,14 +28,7 @@ export async function SiteHeader() {
             Results
           </Link>
           {isSignedIn ? (
-            <form action={logout}>
-              <button
-                type="submit"
-                className="text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-              >
-                Sign out
-              </button>
-            </form>
+            <LogoutButton />
           ) : (
             <Link
               href="/login"
