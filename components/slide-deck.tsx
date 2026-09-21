@@ -154,17 +154,21 @@ export function SlideDeck({ note, initialIndex = 0 }: { note: Note; initialIndex
           </div>
         )}
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          <AnimatePresence mode="wait" custom={direction}>
+        <div className="flex min-w-0 flex-1 flex-col" style={{ perspective: 2000 }}>
+          <AnimatePresence mode="wait" initial={false}>
             {isComplete ? (
               <motion.div
                 key="complete"
-                custom={direction}
-                initial={{ opacity: 0, x: direction * 40 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -direction * 40 }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
-                className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-black/5 bg-white px-6 py-20 text-center dark:border-white/10 dark:bg-zinc-900"
+                initial={{ opacity: 0, rotateY: direction > 0 ? 100 : -100 }}
+                animate={{ opacity: 1, rotateY: 0 }}
+                exit={{ opacity: 0, rotateY: direction > 0 ? -100 : 100 }}
+                transition={{ duration: 0.45, ease: [0.45, 0.05, 0.25, 1] }}
+                style={{
+                  transformOrigin: direction > 0 ? "left center" : "right center",
+                  transformStyle: "preserve-3d",
+                  backfaceVisibility: "hidden",
+                }}
+                className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-black/5 bg-white px-6 py-20 text-center shadow-xl dark:border-white/10 dark:bg-zinc-900"
               >
                 <div
                   className="flex h-16 w-16 items-center justify-center rounded-full text-3xl"
@@ -199,13 +203,25 @@ export function SlideDeck({ note, initialIndex = 0 }: { note: Note; initialIndex
               slide && (
                 <motion.div
                   key={index}
-                  custom={direction}
-                  initial={{ opacity: 0, x: direction * 40 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -direction * 40 }}
-                  transition={{ duration: 0.25, ease: "easeOut" }}
-                  className="flex flex-1 flex-col rounded-2xl border border-black/5 bg-white p-6 sm:p-10 dark:border-white/10 dark:bg-zinc-900"
+                  initial={{ opacity: 0, rotateY: direction > 0 ? 100 : -100 }}
+                  animate={{ opacity: 1, rotateY: 0 }}
+                  exit={{ opacity: 0, rotateY: direction > 0 ? -100 : 100 }}
+                  transition={{ duration: 0.45, ease: [0.45, 0.05, 0.25, 1] }}
+                  style={{
+                    transformOrigin: direction > 0 ? "left center" : "right center",
+                    transformStyle: "preserve-3d",
+                    backfaceVisibility: "hidden",
+                  }}
+                  className="relative flex flex-1 flex-col overflow-hidden rounded-2xl border border-black/5 bg-white p-6 shadow-xl sm:p-10 dark:border-white/10 dark:bg-zinc-900"
                 >
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-y-0 w-10"
+                    style={{
+                      [direction > 0 ? "left" : "right"]: 0,
+                      background: `linear-gradient(to ${direction > 0 ? "right" : "left"}, rgba(0,0,0,0.06), transparent)`,
+                    }}
+                  />
                   <span
                     className="mb-3 inline-flex w-fit items-center rounded-full px-2.5 py-1 text-xs font-semibold"
                     style={{ backgroundColor: `${note.accent}26`, color: note.accent }}
