@@ -26,16 +26,16 @@ export function InterviewBanner({ topicCount }: { topicCount: number }) {
           Mock interview · Gemini graded
         </span>
         <h2 className="mt-3 text-xl font-bold tracking-tight text-white sm:text-2xl">
-          Start a Full Stack Interview
+          Take a Mock Interview
         </h2>
         <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-zinc-300">
-          One combined interview drawing from all {topicCount} topics — JavaScript, Node.js,
-          React, MongoDB and Next.js. Answer by typing, code, or speak your answer aloud.
+          Choose Full Stack, Frontend, or Backend — combined interviews drawing from all{" "}
+          {topicCount} topics. Answer by typing, code, or speak your answer aloud.
         </p>
       </div>
 
       <span className="inline-flex shrink-0 items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-zinc-900 shadow-md transition-transform group-hover:scale-[1.03]">
-        Start interview
+        Choose interview
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
           <path
             fillRule="evenodd"
