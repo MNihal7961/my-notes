@@ -22,10 +22,10 @@ export const javascriptNotes: NoteData = {
       content: `
 JavaScript is a high-level, dynamically typed programming language.
 
-• Used for frontend and backend development
-• Runs in browsers and Node.js
-• Single-threaded JavaScript execution
-• Supports asynchronous and non-blocking operations
+• Used to build both frontend and backend apps
+• Runs in browsers and in Node.js
+• Executes code on a single thread (one thing at a time)
+• Can still handle async work like timers and API calls without blocking
 
 Interview Answer:
 "JavaScript is a high-level programming language mainly used for web development. It runs in browsers and also on the backend using Node.js."
@@ -39,6 +39,7 @@ var
 • Function scoped
 • Can be redeclared
 • Can be reassigned
+• When declared globally, it becomes a property on the global object (window in browsers)
 
 let
 • Block scoped
@@ -48,7 +49,7 @@ let
 const
 • Block scoped
 • Cannot be redeclared
-• Cannot be reassigned
+• Cannot be reassigned (but the contents of an object or array it points to can still change)
 
 Best Practice:
 Use const by default and let when the value needs to change.
@@ -68,7 +69,7 @@ const role = "Developer";
     {
       title: "Scope",
       content: `
-Scope determines where variables can be accessed.
+Scope decides where in your code a variable can be used.
 
 Main Types:
 • Global Scope
@@ -95,19 +96,22 @@ console.log(name); // ReferenceError`,
     {
       title: "Hoisting",
       content: `
-Hoisting means JavaScript processes declarations before executing the code.
+Hoisting means JavaScript moves declarations to the top of their scope before running the code.
 
 var:
 • Hoisted
-• Initialized with undefined
+• Set to undefined until the line where it's assigned
 
 let and const:
 • Hoisted
-• Not initialized immediately
-• Stay in the Temporal Dead Zone until declaration
+• Not usable until their declaration line
+• Stay in the Temporal Dead Zone until then
+
+function declarations:
+• Hoisted completely, body included — so they can be called before they appear in the file
 
 Interview Answer:
-"var is hoisted and initialized with undefined, while let and const remain in the Temporal Dead Zone until initialization."
+"var is hoisted and set to undefined, while let and const are hoisted too but stay in the Temporal Dead Zone until they're declared."
       `,
       code: {
         language: "javascript",
@@ -122,12 +126,12 @@ let b = 20;`,
     {
       title: "Temporal Dead Zone",
       content: `
-The Temporal Dead Zone (TDZ) is the period between entering a scope and initializing a let or const variable.
+The Temporal Dead Zone (TDZ) is the time between entering a scope and the line where a let or const variable is actually declared.
 
-Accessing the variable during this period throws a ReferenceError.
+Trying to use the variable during this time throws a ReferenceError.
 
 Remember:
-let and const are hoisted, but cannot be accessed before initialization.
+let and const are hoisted, but you can't touch them before their declaration line.
       `,
       code: {
         language: "javascript",
@@ -141,7 +145,7 @@ let name = "Nihal";`,
     {
       title: "Primitive vs Reference Types",
       content: `
-Primitive values are copied by value.
+Primitive values are copied by value — each variable gets its own independent copy.
 
 Examples:
 • string
@@ -152,9 +156,11 @@ Examples:
 • bigint
 • symbol
 
-Objects, arrays and functions behave as reference values.
+Primitives are also immutable. You can't change a string or number in place, only reassign the variable to a new value.
 
-Changing a referenced object can affect another variable pointing to the same object.
+Objects, arrays and functions are reference types. The variable stores a reference (like an address) to the value, not the value itself.
+
+Copying a reference just copies the address, so both variables end up pointing to the same object.
       `,
       code: {
         language: "javascript",
@@ -177,12 +183,15 @@ console.log(user1.name); // John`,
     {
       title: "== vs ===",
       content: `
-== compares values after type coercion.
+== compares values after converting them to the same type (type coercion).
 
-=== compares both value and type without type coercion.
+=== compares both the value and the type, with no conversion.
+
+Gotcha:
+null == undefined is true, but null === undefined is false.
 
 Best Practice:
-Prefer === because the comparison is more predictable.
+Prefer === because the result is more predictable.
       `,
       code: {
         language: "javascript",
@@ -196,10 +205,13 @@ Prefer === because the comparison is more predictable.
       title: "null vs undefined",
       content: `
 undefined:
-Usually means a value has not been assigned.
+A variable has been declared but hasn't been given a value yet. JavaScript sets this automatically.
 
 null:
-Usually represents an intentionally empty value.
+The value is empty on purpose — a developer set it that way.
+
+Gotcha:
+typeof null returns "object". This is a well-known bug in JavaScript that was never fixed, to avoid breaking old code.
 
 Remember:
 undefined → missing / not assigned
@@ -229,9 +241,9 @@ Common Types:
 • Function expression
 • Arrow function
 
-Function declarations are fully hoisted.
+Function declarations are fully hoisted, so they can be called before they appear in the code.
 
-Arrow functions have different this behavior compared with regular functions.
+Function expressions and arrow functions behave like variables — they aren't usable before the line that defines them.
       `,
       code: {
         language: "javascript",
@@ -251,17 +263,18 @@ const multiply = (a, b) => a * b;`,
       title: "Arrow vs Regular Functions",
       content: `
 Regular Function:
-• Has its own this depending on how it is called
+• Gets its own this, based on how it's called
 • Can be used as a constructor with new
-• Has arguments object
+• Has access to the arguments object
 
 Arrow Function:
-• Does not create its own this
-• Uses this from surrounding lexical scope
+• Does not get its own this
+• Uses this from the surrounding (lexical) scope
 • Cannot be used as a constructor
+• Has no arguments object
 
 Interview Tip:
-The biggest difference commonly asked is how this behaves.
+The biggest difference interviewers ask about is how this behaves.
       `,
       code: {
         language: "javascript",
@@ -275,23 +288,26 @@ The biggest difference commonly asked is how this behaves.
   arrow: () => {
     console.log(this.name);
   }
-};`,
+};
+
+user.regular(); // "Nihal"
+user.arrow();   // undefined (this isn't "user" here)`,
       },
     },
 
     {
       title: "this Keyword",
       content: `
-this refers to a context determined by how a regular function is called.
+this refers to whatever object is "in control" when a regular function runs — it depends on how the function was called, not where it was written.
 
 In an object method:
 this usually refers to the object before the dot.
 
-Arrow functions do not create their own this.
-They inherit it from the surrounding scope.
+Arrow functions don't get their own this.
+They use this from the scope they were written in.
 
 Interview Answer:
-"The value of this in a regular function depends on how the function is called, while arrow functions inherit this lexically."
+"The value of this in a regular function depends on how the function is called, while arrow functions inherit this from their surrounding scope."
       `,
       code: {
         language: "javascript",
@@ -309,20 +325,85 @@ console.log(user.getName());
     },
 
     {
+      title: "call, apply and bind",
+      content: `
+call, apply and bind all let you control what this points to inside a function.
+
+call(thisArg, arg1, arg2, ...)
+• Runs the function right away
+• Arguments are passed one at a time
+
+apply(thisArg, [arg1, arg2, ...])
+• Runs the function right away
+• Arguments are passed as an array
+
+bind(thisArg, arg1, ...)
+• Does NOT run the function
+• Returns a new function with this permanently set, to call later
+
+Interview Answer:
+"call and apply run the function immediately with a given this — they only differ in how arguments are passed. bind returns a new function for later use."
+      `,
+      code: {
+        language: "javascript",
+        code: `const user = { name: "Nihal" };
+
+function greet(greeting) {
+  console.log(greeting + ", " + this.name);
+}
+
+greet.call(user, "Hi");     // Hi, Nihal
+greet.apply(user, ["Hi"]);  // Hi, Nihal
+
+const boundGreet = greet.bind(user);
+boundGreet("Hello");        // Hello, Nihal`,
+      },
+    },
+
+    {
+      title: "Prototypes & Inheritance",
+      content: `
+Every JavaScript object has a hidden link to another object, called its prototype.
+
+If a property isn't found directly on an object, JavaScript looks up the prototype chain until it finds it (or reaches null).
+
+This is how objects "inherit" behavior — for example, array.map() actually lives on Array.prototype, not on the array itself.
+
+class syntax:
+Modern JavaScript classes are mostly a cleaner way to write this same prototype-based inheritance.
+
+Interview Answer:
+"JavaScript uses prototypal inheritance. Every object has a hidden link to another object, and property lookups walk up this prototype chain until they find a match."
+      `,
+      code: {
+        language: "javascript",
+        code: `const animal = {
+  speak() {
+    console.log(this.name + " makes a sound");
+  }
+};
+
+const dog = Object.create(animal);
+dog.name = "Rex";
+
+dog.speak();
+// Rex makes a sound (speak is found on the prototype)`,
+      },
+    },
+
+    {
       title: "Closure",
       content: `
-A closure happens when a function retains access to variables from its outer lexical scope.
-
-The variables remain accessible even after the outer function has completed.
+A closure happens when a function "remembers" the variables from the scope it was created in, even after that outer function has already finished running.
 
 Common Uses:
-• Data privacy
+• Keeping data private
 • Counters
 • Factory functions
 • Callbacks
 
 Interview Answer:
-"A closure allows a function to remember variables from its outer scope even after the outer function has finished executing."
+"A closure lets a function remember variables from its outer scope, even after that outer function has already returned."
       `,
       code: {
         language: "javascript",
@@ -345,9 +426,9 @@ counter(); // 2`,
     {
       title: "Callback Function",
       content: `
-A callback is a function passed to another function.
+A callback is a function you pass into another function, so it can be run later.
 
-The receiving function can execute the callback when needed.
+The function that receives it decides when — or if — to run it.
 
 Callbacks are commonly used with:
 • Events
@@ -371,11 +452,10 @@ greet("Nihal", () => {
     {
       title: "Higher-Order Functions",
       content: `
-A higher-order function is a function that:
+A higher-order function is a function that does at least one of these:
 
-• Accepts another function as an argument
-OR
-• Returns another function
+• Takes another function as an argument
+• Returns a function
 
 Common examples:
 • map()
@@ -395,10 +475,10 @@ const doubled = numbers.map(
     {
       title: "map()",
       content: `
-map() transforms every element and returns a new array.
+map() runs a function on every element and returns a new array with the results.
 
 Use it when:
-You want the same number of elements but with transformed values.
+You need the same number of elements, just transformed.
 
 Remember:
 map → transform
@@ -419,7 +499,7 @@ console.log(doubled);
     {
       title: "filter()",
       content: `
-filter() returns a new array containing only elements that pass a condition.
+filter() returns a new array with only the elements that pass a test (a function that returns true or false).
 
 Remember:
 filter → select
@@ -440,9 +520,9 @@ const activeUsers = users.filter(
     {
       title: "reduce()",
       content: `
-reduce() processes an array and produces one accumulated result.
+reduce() goes through an array and boils it down to a single value.
 
-The result could be:
+That value could be:
 • Number
 • Object
 • Array
@@ -468,16 +548,16 @@ console.log(total);
     {
       title: "Spread Operator",
       content: `
-The spread operator (...) expands values from arrays or objects.
+The spread operator (...) unpacks values from an array or object.
 
 Common Uses:
 • Copy arrays
 • Copy objects
 • Merge objects
-• Pass function arguments
+• Pass array items as function arguments
 
 Important:
-Spread creates only a shallow copy.
+Spread only makes a shallow copy — nested objects are still shared with the original.
       `,
       code: {
         language: "javascript",
@@ -496,12 +576,12 @@ const updatedUser = {
     {
       title: "Rest Operator",
       content: `
-Rest also uses ...
+Rest also uses the ... syntax, but it does the opposite of spread.
 
-Instead of expanding values, rest collects multiple values together.
+Instead of unpacking values, it gathers multiple values into one array.
 
-Spread → expands
-Rest → collects
+Spread → unpacks
+Rest → gathers
       `,
       code: {
         language: "javascript",
@@ -520,9 +600,11 @@ sum(1, 2, 3);
     {
       title: "Destructuring",
       content: `
-Destructuring extracts values from arrays or objects into variables.
+Destructuring pulls values out of arrays or objects and puts them straight into variables.
 
 It makes code shorter and easier to read.
+
+You can also rename variables and give them default values while destructuring.
       `,
       code: {
         language: "javascript",
@@ -532,6 +614,9 @@ It makes code shorter and easier to read.
 };
 
 const { name, age } = user;
+
+const { name: userName = "Guest" } = user;
+// userName is "Nihal"
 
 const numbers = [10, 20];
 
@@ -543,14 +628,14 @@ const [first, second] = numbers;`,
       title: "Shallow vs Deep Copy",
       content: `
 Shallow Copy:
-Copies only the first level.
+Copies only the top level of an object.
 
-Nested objects can still share references.
+Any nested objects inside are still shared with the original.
 
 Deep Copy:
-Creates independent copies of nested values.
+Makes a fully independent copy, including everything nested inside.
 
-Modern JavaScript provides structuredClone() for many deep-cloning cases.
+Modern JavaScript has structuredClone() built in for most deep-cloning needs.
       `,
       code: {
         language: "javascript",
@@ -573,10 +658,10 @@ const deepCopy = structuredClone(user);`,
       title: "Synchronous vs Asynchronous",
       content: `
 Synchronous:
-Code executes one operation at a time in sequence.
+Code runs one line at a time, in order. Each line waits for the one before it to finish.
 
 Asynchronous:
-An operation can start and complete later without blocking other work.
+An operation can start now and finish later, without blocking the rest of the code.
 
 Common Async Operations:
 • API requests
@@ -584,7 +669,7 @@ Common Async Operations:
 • Database operations
 • File operations
 
-JavaScript uses the event loop to coordinate asynchronous work.
+JavaScript uses the event loop to manage this async work.
       `,
       code: {
         language: "javascript",
@@ -605,16 +690,18 @@ console.log("End");
     {
       title: "Promise",
       content: `
-A Promise represents the eventual result of an asynchronous operation.
+A Promise represents a value that isn't ready yet but will be at some point — like the result of an API call.
 
 Three States:
-• Pending
-• Fulfilled
-• Rejected
+• Pending — still waiting
+• Fulfilled — succeeded
+• Rejected — failed
 
-.then() handles fulfillment.
-.catch() handles rejection.
-.finally() runs after settlement.
+.then() runs when the promise succeeds.
+.catch() runs when it fails.
+.finally() runs either way, once the promise has settled.
+
+You can also create your own promise with new Promise((resolve, reject) => { ... }).
       `,
       code: {
         language: "javascript",
@@ -629,16 +716,16 @@ Three States:
     {
       title: "async / await",
       content: `
-async/await provides cleaner syntax for working with Promises.
+async/await is a cleaner way to write code that uses Promises.
 
 async:
-Makes a function return a Promise.
+Marks a function so it always returns a Promise.
 
 await:
-Waits inside an async function for a Promise to settle before continuing that function.
+Pauses that function until the Promise settles, then continues with the result.
 
 Important:
-await does not block the entire JavaScript thread.
+await only pauses the async function it's inside — it does not block the rest of the JavaScript thread.
       `,
       code: {
         language: "javascript",
@@ -658,16 +745,16 @@ await does not block the entire JavaScript thread.
     {
       title: "Promise.all()",
       content: `
-Promise.all() waits for multiple Promises together.
+Promise.all() runs multiple promises at the same time and waits for all of them to finish.
 
 Best when:
-Operations are independent and all results are required.
+The operations don't depend on each other, and you need every result.
 
 Important:
-If any Promise rejects, Promise.all() rejects.
+If even one promise rejects, Promise.all() immediately rejects too.
 
 Interview Answer:
-"I use Promise.all when independent async operations can run concurrently and all of them must succeed."
+"I use Promise.all when independent async operations can run at the same time and all of them need to succeed."
       `,
       code: {
         language: "javascript",
@@ -681,17 +768,17 @@ Interview Answer:
     {
       title: "Promise.allSettled()",
       content: `
-Promise.allSettled() waits until every Promise has settled.
+Promise.allSettled() waits for every promise to finish, whether it succeeds or fails.
 
-It does not fail immediately when one Promise rejects.
+It never rejects early — you always get a result back for each promise.
 
-Each result tells whether it was:
+Each result tells you whether it was:
 • fulfilled
 • rejected
 
 Remember:
-all → all must succeed
-allSettled → wait for all results
+all → stops early if one fails
+allSettled → always waits for every result
       `,
       code: {
         language: "javascript",
@@ -706,15 +793,17 @@ allSettled → wait for all results
     {
       title: "Call Stack",
       content: `
-The Call Stack keeps track of functions currently being executed.
+The Call Stack keeps track of which function is currently running.
 
 When a function is called:
-It is pushed onto the stack.
+It gets pushed onto the stack.
 
 When it finishes:
-It is removed from the stack.
+It gets popped off the stack.
 
-JavaScript executes synchronous code through the call stack.
+JavaScript runs synchronous code through this stack, one function at a time.
+
+If functions keep calling each other too deeply (like infinite recursion), the stack runs out of room and throws a "Maximum call stack size exceeded" error — a stack overflow.
 
 Remember:
 LIFO → Last In, First Out
@@ -740,18 +829,18 @@ first();
     {
       title: "Event Loop ⭐",
       content: `
-The Event Loop coordinates asynchronous work with JavaScript's execution.
+The Event Loop is what lets JavaScript handle async work even though it only has one call stack.
 
 Simple Flow:
 
-1. Synchronous JavaScript runs on the Call Stack
-2. Async work is handled outside the Call Stack by the host/runtime
-3. When async work completes, its callback/task becomes ready in a queue
-4. The Event Loop checks when the Call Stack can continue with queued work
-5. Ready callbacks are eventually executed on the Call Stack
+1. Synchronous code runs first, on the Call Stack
+2. Async work (timers, network requests, etc.) is handled outside the Call Stack, by the browser or Node.js
+3. When that async work finishes, its callback is placed in a queue
+4. The Event Loop waits until the Call Stack is empty
+5. Then it takes callbacks from the queue and runs them on the Call Stack
 
 Interview Answer:
-"JavaScript executes code on a single call stack. Async operations are handled by the runtime. When they complete, their callbacks are queued, and the event loop coordinates when that queued work can execute on the call stack."
+"JavaScript runs on a single call stack. Async operations are handled outside that stack by the runtime. Once they finish, their callbacks go into a queue, and the event loop moves them onto the call stack once it's empty."
       `,
       code: {
         language: "javascript",
@@ -772,17 +861,17 @@ console.log("End");
     {
       title: "Microtask vs Task Queue",
       content: `
-Async callbacks do not all have the same priority.
+Not all async callbacks have the same priority.
 
 Microtasks include:
-• Promise callbacks
+• Promise callbacks (.then, .catch, .finally)
 • queueMicrotask()
 
-Tasks include:
+Tasks (sometimes called macrotasks) include:
 • setTimeout()
 • setInterval()
 
-After current synchronous code completes, microtasks are processed before the next task.
+After the current synchronous code finishes, JavaScript runs ALL pending microtasks before it moves on to the next task.
 
 Common Interview Question:
 Why does a Promise callback run before setTimeout(..., 0)?
@@ -811,14 +900,14 @@ console.log("End");
     {
       title: "setTimeout(..., 0)",
       content: `
-setTimeout(fn, 0) does NOT mean the function executes immediately.
+setTimeout(fn, 0) does NOT run the function immediately.
 
-It means the callback becomes eligible to run after the minimum delay.
+It just means the callback is ready to run as soon as possible, after the minimum delay.
 
-It still waits until:
-• Current synchronous code finishes
-• Higher-priority queued work is handled
-• The event loop can process the task
+It still has to wait for:
+• The current synchronous code to finish
+• All pending microtasks to run
+• The event loop to reach it in the queue
       `,
       code: {
         language: "javascript",
@@ -839,11 +928,11 @@ console.log("C");
     {
       title: "Error Handling",
       content: `
-try/catch is used to handle errors.
+try/catch is used to handle errors so your program doesn't crash.
 
-With async/await, place awaited operations inside try/catch when you want to handle rejection locally.
+With async/await, wrap your awaited code in try/catch to handle a rejected promise right where it happens.
 
-finally executes whether the operation succeeds or fails.
+finally always runs, whether the code succeeded or threw an error.
       `,
       code: {
         language: "javascript",
@@ -863,9 +952,11 @@ finally executes whether the operation succeeds or fails.
     {
       title: "Optional Chaining",
       content: `
-Optional chaining ?. safely accesses nested properties.
+Optional chaining (?.) safely reads a nested property without crashing.
 
-If the value before ?. is null or undefined, JavaScript returns undefined instead of throwing an error.
+If the value before ?. is null or undefined, JavaScript stops right there and returns undefined instead of throwing an error.
+
+It also works for calling functions that might not exist, like user.greet?.()
       `,
       code: {
         language: "javascript",
@@ -882,9 +973,9 @@ console.log(
     {
       title: "Nullish Coalescing",
       content: `
-The ?? operator provides a fallback only when the value is null or undefined.
+The ?? operator gives you a fallback value, but only when the original value is null or undefined.
 
-This differs from ||, which also treats values like 0, false and "" as falsy.
+This is different from ||, which also treats 0, false, and "" (empty string) as falsy and replaces them too.
       `,
       code: {
         language: "javascript",
@@ -901,12 +992,12 @@ console.log(count ?? 10);
     {
       title: "Debouncing",
       content: `
-Debouncing waits until repeated activity stops before executing a function.
+Debouncing waits until repeated activity stops for a moment, then runs the function once.
 
 Common Example:
-Search input
+A search input box.
 
-Instead of calling an API for every keystroke, wait until the user stops typing.
+Instead of calling an API on every single keystroke, wait until the user stops typing.
 
 Common Uses:
 • Search
@@ -914,7 +1005,7 @@ Common Uses:
 • Autocomplete
 
 Remember:
-Debounce → wait until activity stops
+Debounce → wait until things go quiet
       `,
       code: {
         language: "javascript",
@@ -935,9 +1026,9 @@ Debounce → wait until activity stops
     {
       title: "Throttling",
       content: `
-Throttling limits how frequently a function can execute.
+Throttling limits how often a function can run, no matter how many times it's triggered.
 
-Even if an event fires many times, the function runs only at controlled intervals.
+Even if an event fires constantly, the function only runs at set intervals.
 
 Common Uses:
 • Scroll
@@ -946,7 +1037,7 @@ Common Uses:
 
 Remember:
 Debounce → wait until activity stops
-Throttle → limit execution frequency
+Throttle → limit how often it runs
       `,
       code: {
         language: "javascript",
@@ -996,10 +1087,12 @@ Throttle → limit execution frequency
 • Optional Chaining
 • Nullish Coalescing
 • Debounce / Throttle
+• call / apply / bind
+• Prototypes & Inheritance
 
 Interview Rule:
 
-Don't try to give a long answer.
+Don't give a long answer.
 
 Use:
 1. Definition
