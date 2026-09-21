@@ -1,17 +1,24 @@
 "use client";
 
-import { useActionState } from "react";
+import { useEffect, useActionState } from "react";
+import { useRouter } from "next/navigation";
 import { login, type LoginState } from "@/lib/actions/auth";
 
-const initialState: LoginState = { error: null };
+const initialState: LoginState = { error: null, success: false };
 
 export function LoginForm({ next }: { next: string }) {
   const [state, formAction, pending] = useActionState(login, initialState);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!state.success) return;
+    router.push(next.startsWith("/") ? next : "/");
+    router.refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.success]);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <input type="hidden" name="next" value={next} />
-
       <div className="flex flex-col gap-1.5">
         <label htmlFor="username" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
           Username
