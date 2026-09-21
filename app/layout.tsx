@@ -41,7 +41,7 @@ const themeInitScript = `
 })();
 `;
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children, modal }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
@@ -53,6 +53,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="flex min-h-full flex-col bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
         {children}
+        {modal}
       </body>
     </html>
   );
