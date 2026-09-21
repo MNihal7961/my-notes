@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getExamResultById } from "@/lib/exam-results";
-import { FULL_STACK_SLUG } from "@/lib/notes";
+import { isInterviewTrackSlug } from "@/lib/notes";
 
 export const metadata = { title: "Exam Result" };
 
@@ -85,10 +85,10 @@ export default async function ResultDetailPage(props: PageProps<"/results/[id]">
       </div>
 
       <Link
-        href={result.slug === FULL_STACK_SLUG ? "/" : `/notes/${result.slug}`}
+        href={isInterviewTrackSlug(result.slug) ? "/" : `/notes/${result.slug}`}
         className="mt-8 inline-block w-fit rounded-full bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
       >
-        {result.slug === FULL_STACK_SLUG ? "Back home" : "Back to note"}
+        {isInterviewTrackSlug(result.slug) ? "Back home" : "Back to note"}
       </Link>
     </div>
   );
