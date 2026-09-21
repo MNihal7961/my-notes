@@ -1,34 +1,38 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+
+function subscribe() {
+  return () => {};
+}
+
+function getSnapshot() {
+  return document.documentElement.classList.contains("dark");
+}
+
+function getServerSnapshot() {
+  return false;
+}
 
 export function ThemeToggle({ className = "" }: { className?: string }) {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [mounted, setMounted] = useState(false);
+  const isDarkFromDom = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const [override, setOverride] = useState<"light" | "dark" | null>(null);
+  const theme = override ?? (isDarkFromDom ? "dark" : "light");
 
   useEffect(() => {
-    setTheme(document.documentElement.classList.contains("dark") ? "dark" : "light");
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-    document.documentElement.classList.toggle("dark", theme === "dark");
+    if (override === null) return;
+    document.documentElement.classList.toggle("dark", override === "dark");
     try {
-      localStorage.setItem("theme", theme);
+      localStorage.setItem("theme", override);
     } catch {
       // storage unavailable, ignore
     }
-  }, [theme, mounted]);
-
-  if (!mounted) {
-    return <div className={`h-9 w-9 ${className}`} aria-hidden="true" />;
-  }
+  }, [override]);
 
   return (
     <button
       type="button"
-      onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
+      onClick={() => setOverride(theme === "dark" ? "light" : "dark")}
       aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
       className={`flex h-9 w-9 items-center justify-center rounded-full border border-black/10 text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-white/10 dark:text-zinc-300 dark:hover:bg-zinc-800 ${className}`}
     >
