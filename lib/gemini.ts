@@ -33,25 +33,43 @@ const questionsSchema = {
   required: ["questions"],
 };
 
-export async function generateExamQuestions(note: Note): Promise<ExamQuestion[]> {
+export type QuestionMix = { mcq: number; descriptive: number; coding: number };
+
+const DEFAULT_MIX: QuestionMix = { mcq: 2, descriptive: 2, coding: 1 };
+
+export async function generateExamQuestions(
+  note: Note,
+  mix: QuestionMix = DEFAULT_MIX
+): Promise<ExamQuestion[]> {
   const ai = getClient();
+  const total = mix.mcq + mix.descriptive + mix.coding;
+
+  // Strip decorative emoji (e.g. a title like "Event Loop ⭐", or a
+  // "🔥 MUST KNOW" checklist heading) — these are reading aids for a
+  // student, not quizzable facts, but left in raw they invite meta
+  // questions like "which topic is starred?" instead of technical ones.
+  const stripDecoration = (text: string) =>
+    text.replace(/\p{Extended_Pictographic}/gu, "").replace(/[ \t]{2,}/g, " ").trim();
 
   const slideSummary = note.slides
-    .map((slide, i) => `${i + 1}. ${slide.title}\n${slide.content.trim()}`)
+    .map((slide, i) => {
+      const code = slide.code ? `\n\`\`\`${slide.code.language}\n${slide.code.code.trim()}\n\`\`\`` : "";
+      return `${i + 1}. ${stripDecoration(slide.title)}\n${stripDecoration(slide.content)}${code}`;
+    })
     .join("\n\n");
 
   const prompt = `You are creating a short interview-prep exam for a study-notes app.
 Topic: ${note.title}
-Below are the topic's study slides. Base every question strictly on this material.
+Below are the topic's study material. Base every question strictly on the underlying technical concepts in this material.
 
 ${slideSummary}
 
-Generate exactly 5 exam questions:
-- 2 multiple-choice questions (type "mcq") with exactly 4 short "options" and a 0-based "correctOptionIndex"
-- 2 short-answer / descriptive questions (type "descriptive") that ask the candidate to explain a concept in their own words
-- 1 coding question (type "coding") that asks the candidate to write a short code snippet; set "language" to the most relevant language for this topic
+Generate exactly ${total} exam questions:
+- ${mix.mcq} multiple-choice question${mix.mcq === 1 ? "" : "s"} (type "mcq") with exactly 4 short "options" and a 0-based "correctOptionIndex"
+- ${mix.descriptive} short-answer / descriptive question${mix.descriptive === 1 ? "" : "s"} (type "descriptive") that ask${mix.descriptive === 1 ? "s" : ""} the candidate to explain a concept in their own words
+- ${mix.coding} coding question${mix.coding === 1 ? "" : "s"} (type "coding") that ask${mix.coding === 1 ? "s" : ""} the candidate to write a short code snippet; set "language" to the most relevant language for each
 
-Keep each question prompt concise (1-3 sentences) and clearly answerable from the material above. Do not include an answer key in the question prompt text itself.`;
+Ask real technical interview questions that test understanding of the concepts themselves (definitions, behavior, trade-offs, "what does this code output", "how would you implement X"). Never ask about how the source material is organized, labeled, formatted, ordered, or prioritized — for example, never ask something like "which topic is marked important" or "what is listed first". If the material spans multiple distinct topics, spread the questions across as many of them as possible rather than clustering on one. Keep each question prompt concise (1-3 sentences) and clearly answerable from the material above. Do not include an answer key in the question prompt text itself.`;
 
   const response = await ai.models.generateContent({
     model: MODEL,
