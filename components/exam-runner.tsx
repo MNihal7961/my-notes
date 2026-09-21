@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { submitExam } from "@/lib/actions/exam";
 import { MicButton } from "@/components/mic-button";
+import { ExamResultView } from "@/components/exam-result-view";
 import { isInterviewTrackSlug } from "@/lib/notes";
 import type { ExamAnswer, ExamQuestion, ExamResult, Note } from "@/lib/types";
 
@@ -16,6 +17,7 @@ export function ExamRunner({
   questions: ExamQuestion[];
 }) {
   const backHref = isInterviewTrackSlug(note.slug) ? "/" : `/notes/${note.slug}`;
+  const backLabel = isInterviewTrackSlug(note.slug) ? "Back home" : "Back to note";
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -55,7 +57,7 @@ export function ExamRunner({
   }
 
   if (result) {
-    return <ExamResultView note={note} result={result} />;
+    return <ExamResultView result={result} backHref={backHref} backLabel={backLabel} />;
   }
 
   if (submitting) {
@@ -217,85 +219,6 @@ export function ExamRunner({
             </button>
           )}
         </div>
-      </div>
-    </div>
-  );
-}
-
-function ExamResultView({ note, result }: { note: Note; result: ExamResult }) {
-  const backHref = isInterviewTrackSlug(note.slug) ? "/" : `/notes/${note.slug}`;
-  const backLabel = isInterviewTrackSlug(note.slug) ? "Back home" : "Back to note";
-
-  return (
-    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col overflow-y-auto px-4 py-10 sm:px-6">
-      <div className="rounded-2xl border border-black/5 bg-white p-6 text-center shadow-xl sm:p-10 dark:border-white/10 dark:bg-zinc-900">
-        <span
-          className="mx-auto flex h-16 w-16 items-center justify-center rounded-full text-2xl font-bold"
-          style={{ backgroundColor: `${note.accent}33`, color: note.accent }}
-        >
-          {Math.round(result.evaluation.overallScore)}
-        </span>
-        <h2 className="mt-4 text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Exam complete
-        </h2>
-        <p className="mx-auto mt-2 max-w-lg text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-          {result.evaluation.overallFeedback}
-        </p>
-      </div>
-
-      <div className="mt-8 flex flex-col gap-4">
-        {result.questions.map((question, i) => {
-          const qResult = result.evaluation.questionResults.find(
-            (r) => r.questionId === question.id
-          );
-          const answer = result.answers.find((a) => a.questionId === question.id)?.answer;
-          return (
-            <div
-              key={question.id}
-              className="rounded-xl border border-black/5 bg-white p-5 dark:border-white/10 dark:bg-zinc-900"
-            >
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
-                  Q{i + 1}. {question.prompt}
-                </span>
-                {qResult && (
-                  <span
-                    className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
-                      qResult.correct
-                        ? "bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-400"
-                        : "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400"
-                    }`}
-                  >
-                    {qResult.score}/{qResult.maxScore}
-                  </span>
-                )}
-              </div>
-              <p className="mb-2 whitespace-pre-wrap text-sm text-zinc-500 dark:text-zinc-400">
-                Your answer: {answer || "(no answer given)"}
-              </p>
-              {qResult && (
-                <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-                  {qResult.feedback}
-                </p>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="mt-8 flex items-center gap-3">
-        <Link
-          href={backHref}
-          className="rounded-full border border-black/10 px-5 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-white/10 dark:text-zinc-300 dark:hover:bg-zinc-800"
-        >
-          {backLabel}
-        </Link>
-        <Link
-          href="/results"
-          className="rounded-full bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
-        >
-          View all results
-        </Link>
       </div>
     </div>
   );
