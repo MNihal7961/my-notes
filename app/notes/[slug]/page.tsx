@@ -111,6 +111,20 @@ export default async function NoteDetailPage(props: PageProps<"/notes/[slug]">) 
               </svg>
             </Link>
 
+            <Link
+              href={`/notes/${note.slug}/exam`}
+              className="inline-flex items-center gap-2 rounded-full border border-black/10 px-6 py-3 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-white/10 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            >
+              Start exam
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.25a.75.75 0 00-1.5 0v3.5a.75.75 0 00.22.53l2.5 2.5a.75.75 0 101.06-1.06l-2.28-2.28V6.75z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </Link>
+
             <div className="flex items-center gap-5 text-sm text-zinc-500 dark:text-zinc-400">
               <span className="flex items-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
