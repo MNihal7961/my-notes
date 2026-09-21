@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Highlight, themes } from "prism-react-renderer";
+import { Highlight, Prism, themes } from "prism-react-renderer";
 
 export function CodeBlock({ language, code }: { language: string; code: string }) {
   const [copied, setCopied] = useState(false);
+  const tokenizeLanguage = Prism.languages[language] ? language : "text";
 
   async function handleCopy() {
     try {
@@ -33,7 +34,7 @@ export function CodeBlock({ language, code }: { language: string; code: string }
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
-      <Highlight theme={themes.nightOwl} code={code.trim()} language={language}>
+      <Highlight theme={themes.nightOwl} code={code.trim()} language={tokenizeLanguage}>
         {({ className, style, tokens, getLineProps, getTokenProps }) => (
           <pre
             className={`${className} overflow-x-auto p-4 text-[13px] leading-relaxed`}
