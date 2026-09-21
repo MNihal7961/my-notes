@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getAllExamResults } from "@/lib/exam-results";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { logout } from "@/lib/actions/auth";
+import { LogoutButton } from "@/components/logout-button";
 
 export const metadata = { title: "Exam Results" };
 export const dynamic = "force-dynamic";
@@ -28,14 +28,7 @@ export default async function ResultsPage() {
           </Link>
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <form action={logout}>
-              <button
-                type="submit"
-                className="text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-              >
-                Sign out
-              </button>
-            </form>
+            <LogoutButton />
           </div>
         </div>
 
