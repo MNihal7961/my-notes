@@ -27,7 +27,52 @@ export function getNoteSlugs(): string[] {
   return Object.keys(registry);
 }
 
-export const FULL_STACK_SLUG = "full-stack";
+export type InterviewTrack = {
+  slug: string;
+  title: string;
+  description: string;
+  accent: string;
+  icon: string;
+  noteSlugs: string[];
+};
+
+export const INTERVIEW_TRACKS: InterviewTrack[] = [
+  {
+    slug: "full-stack",
+    title: "Full Stack Interview",
+    description:
+      "A comprehensive mock interview spanning JavaScript, Node.js, React, MongoDB and Next.js — the full stack, in one sitting.",
+    accent: "#818cf8",
+    icon: "/images/fullstack-icon.svg",
+    noteSlugs: ["javascript", "nodejs", "react", "mongodb", "nextjs"],
+  },
+  {
+    slug: "frontend",
+    title: "Frontend Interview",
+    description:
+      "A frontend-focused mock interview covering React, JavaScript and Next.js — rendering, hooks, state and the browser side of the stack.",
+    accent: "#38bdf8",
+    icon: "/images/frontend-icon.svg",
+    noteSlugs: ["react", "javascript", "nextjs"],
+  },
+  {
+    slug: "backend",
+    title: "Backend Interview",
+    description:
+      "A backend-focused mock interview covering JavaScript, Node.js and MongoDB — APIs, async work, and data.",
+    accent: "#34d399",
+    icon: "/images/backend-icon.svg",
+    noteSlugs: ["javascript", "nodejs", "mongodb"],
+  },
+];
+
+export function getInterviewTrack(slug: string): InterviewTrack | undefined {
+  return INTERVIEW_TRACKS.find((track) => track.slug === slug);
+}
+
+export function isInterviewTrackSlug(slug: string): boolean {
+  return INTERVIEW_TRACKS.some((track) => track.slug === slug);
+}
 
 /**
  * Picks a spread of real, explanatory slides from a note rather than every
@@ -52,25 +97,31 @@ function sampleSlides(slides: Slide[], count: number): Slide[] {
 
 /**
  * A synthetic "note" that aggregates a sample of real, technical slides
- * from every note (not just descriptions) so Gemini has enough substance
- * to write genuine interview questions instead of meta-questions about
- * which deck covers what. Reuses the entire exam pipeline unchanged, since
- * it's shaped exactly like a real Note.
+ * from the notes that make up an interview track (not just descriptions)
+ * so Gemini has enough substance to write genuine interview questions
+ * instead of meta-questions about which deck covers what. Reuses the
+ * entire exam pipeline unchanged, since it's shaped exactly like a real
+ * Note.
  */
-export function getFullStackNote(): Note {
-  const notes = getAllNotes();
+export function getInterviewNote(trackSlug: string): Note | undefined {
+  const track = getInterviewTrack(trackSlug);
+  if (!track) return undefined;
+
+  const notes = track.noteSlugs
+    .map((slug) => getNoteBySlug(slug))
+    .filter((note): note is Note => Boolean(note));
   const topics = Array.from(new Set(notes.flatMap((note) => note.topics)));
+  const slidesPerNote = notes.length > 0 ? Math.max(3, Math.floor(12 / notes.length)) : 0;
 
   return {
-    slug: FULL_STACK_SLUG,
-    title: "Full Stack Interview",
-    description:
-      "A comprehensive mock interview spanning JavaScript, Node.js, React, MongoDB and Next.js — the full stack, in one sitting.",
-    coverImage: "/images/fullstack-icon.svg",
-    accent: "#818cf8",
+    slug: track.slug,
+    title: track.title,
+    description: track.description,
+    coverImage: track.icon,
+    accent: track.accent,
     topics,
     slides: notes.flatMap((note) =>
-      sampleSlides(note.slides, 4).map((slide) => ({
+      sampleSlides(note.slides, slidesPerNote).map((slide) => ({
         title: `[${note.title}] ${slide.title}`,
         content: slide.content,
         code: slide.code,
@@ -80,6 +131,6 @@ export function getFullStackNote(): Note {
 }
 
 export function getExamNote(slug: string): Note | undefined {
-  if (slug === FULL_STACK_SLUG) return getFullStackNote();
+  if (isInterviewTrackSlug(slug)) return getInterviewNote(slug);
   return getNoteBySlug(slug);
 }
