@@ -664,7 +664,7 @@ Next.js
     {
       title: "Next.js Interview Checklist",
       content:
-        "Make sure you can explain App Router, file-based routing, dynamic routes, layouts, Server Components, Client Components, use client, data fetching, caching, static and dynamic rendering, ISR, Route Handlers, middleware, authentication, metadata, loading, error handling, and performance.",
+        "Make sure you can explain the App Router vs Pages Router, file-based routing, dynamic routes, layouts, Server Components, Client Components, use client, data fetching, caching, static and dynamic rendering, ISR, generateStaticParams, Route Handlers, middleware, authentication, metadata, loading, error handling, and performance.",
     },
   ],
 };
