@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { submitExam } from "@/lib/actions/exam";
 import { MicButton } from "@/components/mic-button";
+import { FULL_STACK_SLUG } from "@/lib/notes";
 import type { ExamAnswer, ExamQuestion, ExamResult, Note } from "@/lib/types";
 
 export function ExamRunner({
@@ -14,6 +15,7 @@ export function ExamRunner({
   note: Note;
   questions: ExamQuestion[];
 }) {
+  const backHref = note.slug === FULL_STACK_SLUG ? "/" : `/notes/${note.slug}`;
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -72,13 +74,13 @@ export function ExamRunner({
       <div className="shrink-0 border-b border-black/5 bg-white/90 backdrop-blur-md dark:border-white/10 dark:bg-zinc-950/90">
         <div className="mx-auto flex max-w-3xl items-center gap-4 px-4 py-3 sm:px-6">
           <Link
-            href={`/notes/${note.slug}`}
+            href={backHref}
             className="text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
           >
             Exit
           </Link>
           <span className="hidden truncate text-sm font-semibold text-zinc-800 sm:inline dark:text-zinc-200">
-            {note.title} — Exam
+            {note.slug === FULL_STACK_SLUG ? note.title : `${note.title} — Exam`}
           </span>
           <span className="ml-auto text-sm font-medium text-zinc-500 dark:text-zinc-400">
             {index + 1} / {total}
@@ -221,6 +223,9 @@ export function ExamRunner({
 }
 
 function ExamResultView({ note, result }: { note: Note; result: ExamResult }) {
+  const backHref = note.slug === FULL_STACK_SLUG ? "/" : `/notes/${note.slug}`;
+  const backLabel = note.slug === FULL_STACK_SLUG ? "Back home" : "Back to note";
+
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col overflow-y-auto px-4 py-10 sm:px-6">
       <div className="rounded-2xl border border-black/5 bg-white p-6 text-center shadow-xl sm:p-10 dark:border-white/10 dark:bg-zinc-900">
@@ -280,10 +285,10 @@ function ExamResultView({ note, result }: { note: Note; result: ExamResult }) {
 
       <div className="mt-8 flex items-center gap-3">
         <Link
-          href={`/notes/${note.slug}`}
+          href={backHref}
           className="rounded-full border border-black/10 px-5 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-white/10 dark:text-zinc-300 dark:hover:bg-zinc-800"
         >
-          Back to note
+          {backLabel}
         </Link>
         <Link
           href="/results"
