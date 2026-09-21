@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { submitExam } from "@/lib/actions/exam";
 import { MicButton } from "@/components/mic-button";
 import type { ExamAnswer, ExamQuestion, ExamResult, Note } from "@/lib/types";
@@ -16,7 +17,6 @@ export function ExamRunner({
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ExamResult | null>(null);
   const startedAt = useMemo(() => new Date().toISOString(), []);
 
@@ -29,8 +29,14 @@ export function ExamRunner({
   }
 
   async function handleSubmit() {
+    const unanswered = questions.length - Object.keys(answers).filter((id) => answers[id]?.trim()).length;
+    if (unanswered > 0) {
+      toast.warning(
+        `${unanswered} question${unanswered > 1 ? "s" : ""} left unanswered — submitting anyway.`
+      );
+    }
+
     setSubmitting(true);
-    setError(null);
     try {
       const answerList: ExamAnswer[] = questions.map((q) => ({
         questionId: q.id,
@@ -38,8 +44,9 @@ export function ExamRunner({
       }));
       const examResult = await submitExam(note.slug, questions, answerList, startedAt);
       setResult(examResult);
+      toast.success(`Exam graded — ${Math.round(examResult.evaluation.overallScore)}/100.`);
     } catch {
-      setError("Something went wrong while grading your exam. Please try again.");
+      toast.error("Something went wrong while grading your exam. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -175,10 +182,6 @@ export function ExamRunner({
                 className="w-full flex-1 resize-none rounded-xl border border-black/10 bg-[#0d1117] p-4 font-mono text-[13px] leading-relaxed text-zinc-100 outline-none focus:border-zinc-600"
               />
             </div>
-          )}
-
-          {error && (
-            <p className="mt-4 text-sm font-medium text-red-600 dark:text-red-400">{error}</p>
           )}
         </div>
 
