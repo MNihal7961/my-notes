@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Highlight, Prism, themes } from "prism-react-renderer";
+import { toast } from "sonner";
 
 export function CodeBlock({ language, code }: { language: string; code: string }) {
   const [copied, setCopied] = useState(false);
@@ -13,7 +14,7 @@ export function CodeBlock({ language, code }: { language: string; code: string }
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
-      // clipboard unavailable, ignore
+      toast.error("Couldn't copy to clipboard.");
     }
   }
 
