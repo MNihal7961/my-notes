@@ -68,7 +68,7 @@ export const reactNotes: NoteData = {
     {
       title: "JSX",
       content:
-        "JSX allows us to write HTML-like syntax inside JavaScript. JSX is converted into JavaScript by the build process.",
+        "JSX lets you write HTML-like syntax inside JavaScript. A build tool like Babel converts JSX into plain JavaScript before it runs in the browser.",
 
       code: {
         language: "tsx",
@@ -122,7 +122,8 @@ State → Managed inside component`,
 
     {
       title: "useState",
-      content: "useState is a Hook used to create and update component state.",
+      content:
+        "useState is a Hook that adds state to a function component. Calling its setter function updates the state and tells React to re-render the component.",
 
       code: {
         language: "tsx",
@@ -182,6 +183,19 @@ useEffect(() => {}, [userId]);`,
     },
 
     {
+      title: "React Strict Mode",
+      content:
+        "StrictMode is a wrapper that helps find bugs during development. It does not render any visible UI. In development only, it can run things like render functions and effects twice on purpose, so you notice side effects that are not clean. It has no effect on the production build.",
+
+      code: {
+        language: "tsx",
+        code: `<React.StrictMode>
+  <App />
+</React.StrictMode>`,
+      },
+    },
+
+    {
       title: "useRef",
       content:
         "useRef stores a value that persists between renders without causing a re-render when changed. It is also commonly used to access DOM elements.",
@@ -236,7 +250,8 @@ useCallback  → caches function`,
 
     {
       title: "Conditional Rendering",
-      content: "React can render different UI based on a condition.",
+      content:
+        "React can show different UI based on a condition. A ternary (condition ? A : B) picks between two options, and the && operator shows something only when a condition is true.",
 
       code: {
         language: "tsx",
@@ -267,7 +282,7 @@ useCallback  → caches function`,
     {
       title: "Why is key important?",
       content:
-        "The key helps React identify which list items changed, were added, or removed. A stable unique ID is preferred.",
+        "The key prop helps React match list items between renders, so it knows which ones changed, were added, or removed. Keys should be stable and unique among siblings. Using the array index as a key can cause bugs if the list is reordered or items are inserted or removed.",
 
       code: {
         language: "tsx",
@@ -280,7 +295,7 @@ useCallback  → caches function`,
     {
       title: "Event Handling",
       content:
-        "React handles browser events using event props such as onClick, onChange, and onSubmit.",
+        "React handles browser events using event props such as onClick, onChange, and onSubmit. The event object passed to the handler is a SyntheticEvent, which wraps the native browser event so it works the same way across browsers.",
 
       code: {
         language: "tsx",
@@ -292,7 +307,8 @@ useCallback  → caches function`,
 
     {
       title: "Controlled Components",
-      content: "In a controlled input, React state controls the input value.",
+      content:
+        "In a controlled input, React state controls the input's value, and every keystroke updates state through onChange. In an uncontrolled input, the DOM keeps the value itself and you read it with a ref instead of state.",
 
       code: {
         language: "tsx",
@@ -386,6 +402,27 @@ console.log(theme);`,
     },
 
     {
+      title: "Custom Hooks",
+      content:
+        "A custom hook is just a function whose name starts with use and that can call other hooks inside it. It lets you pull reusable logic, like fetching data or tracking window size, out of a component so other components can reuse it too.",
+
+      code: {
+        language: "tsx",
+        code: `function useWindowWidth() {
+  const [width, setWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const onResize = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  return width;
+}`,
+      },
+    },
+
+    {
       title: "API Calls in React",
       content:
         "API calls can be made using fetch, Axios, or libraries such as TanStack Query.",
@@ -408,7 +445,7 @@ console.log(theme);`,
     {
       title: "React Rendering",
       content:
-        "When state or props change, React can render the component again. React then updates the required parts of the UI.",
+        "When state or props change, React renders the component again to get the new UI description. React then compares it with the previous version and updates only the parts of the actual DOM that changed.",
 
       code: {
         language: "text",
@@ -425,7 +462,7 @@ DOM is updated`,
     {
       title: "Virtual DOM",
       content:
-        "The Virtual DOM is an in-memory representation of the UI. React uses it to determine what needs to change in the actual DOM.",
+        "The Virtual DOM is an in-memory representation of the UI. React uses it to figure out what changed compared to the last version, and this comparison process is called reconciliation.",
 
       code: {
         language: "text",
@@ -486,7 +523,7 @@ useMemo     → Value`,
     {
       title: "React Router",
       content:
-        "React Router is commonly used to create client-side routes in React applications.",
+        "React Router is a separate library, not part of core React, that is commonly used to add client-side routing to React applications.",
 
       code: {
         language: "tsx",
@@ -505,7 +542,7 @@ useMemo     → Value`,
     {
       title: "Error Boundaries",
       content:
-        "Error boundaries catch rendering errors in child components and allow the application to show fallback UI.",
+        "Error boundaries catch rendering errors in their child components and show fallback UI instead of crashing the whole app. They only work as class components, using componentDidCatch or static getDerivedStateFromError. There is no hook version, so function components usually rely on a library like react-error-boundary.",
 
       code: {
         language: "tsx",
@@ -576,7 +613,7 @@ Backend  → Return 20 users`,
     {
       title: "React Interview Checklist",
       content:
-        "Before the interview, make sure you can explain components, JSX, props, state, useState, useEffect, useRef, useMemo, useCallback, Context, controlled components, lifting state, rendering, keys, API calls, React.memo, performance, routing, and state management.",
+        "Before the interview, make sure you can explain components, JSX, props, state, useState, useEffect, useRef, useMemo, useCallback, custom hooks, Context, controlled vs uncontrolled components, lifting state, rendering, keys, API calls, React.memo, error boundaries, performance, routing, and state management.",
     },
   ],
 };
