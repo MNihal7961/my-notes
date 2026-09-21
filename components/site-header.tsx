@@ -1,7 +1,13 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
+import { logout } from "@/lib/actions/auth";
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const cookieStore = await cookies();
+  const isSignedIn = Boolean(verifySessionToken(cookieStore.get(SESSION_COOKIE)?.value));
+
   return (
     <header className="sticky top-0 z-40 border-b border-black/5 bg-white/80 backdrop-blur-md dark:border-white/10 dark:bg-zinc-950/80">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -15,9 +21,29 @@ export function SiteHeader() {
           <span className="tracking-tight">My Notes</span>
         </Link>
         <div className="flex items-center gap-4">
-          <span className="hidden text-sm font-medium text-zinc-500 sm:inline dark:text-zinc-400">
-            Interactive study notes
-          </span>
+          <Link
+            href="/results"
+            className="hidden text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-900 sm:inline dark:text-zinc-400 dark:hover:text-zinc-50"
+          >
+            Results
+          </Link>
+          {isSignedIn ? (
+            <form action={logout}>
+              <button
+                type="submit"
+                className="text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+              >
+                Sign out
+              </button>
+            </form>
+          ) : (
+            <Link
+              href="/login"
+              className="text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+            >
+              Sign in
+            </Link>
+          )}
           <ThemeToggle />
         </div>
       </div>
