@@ -1,0 +1,294 @@
+"use client";
+
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import { submitExam } from "@/lib/actions/exam";
+import { MicButton } from "@/components/mic-button";
+import type { ExamAnswer, ExamQuestion, ExamResult, Note } from "@/lib/types";
+
+export function ExamRunner({
+  note,
+  questions,
+}: {
+  note: Note;
+  questions: ExamQuestion[];
+}) {
+  const [index, setIndex] = useState(0);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<ExamResult | null>(null);
+  const startedAt = useMemo(() => new Date().toISOString(), []);
+
+  const total = questions.length;
+  const question = questions[index];
+  const isLast = index === total - 1;
+
+  function setAnswer(questionId: string, value: string) {
+    setAnswers((prev) => ({ ...prev, [questionId]: value }));
+  }
+
+  async function handleSubmit() {
+    setSubmitting(true);
+    setError(null);
+    try {
+      const answerList: ExamAnswer[] = questions.map((q) => ({
+        questionId: q.id,
+        answer: answers[q.id] ?? "",
+      }));
+      const examResult = await submitExam(note.slug, questions, answerList, startedAt);
+      setResult(examResult);
+    } catch {
+      setError("Something went wrong while grading your exam. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (result) {
+    return <ExamResultView note={note} result={result} />;
+  }
+
+  if (submitting) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-50" />
+        <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+          Grading your answers with Gemini…
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="shrink-0 border-b border-black/5 bg-white/90 backdrop-blur-md dark:border-white/10 dark:bg-zinc-950/90">
+        <div className="mx-auto flex max-w-3xl items-center gap-4 px-4 py-3 sm:px-6">
+          <Link
+            href={`/notes/${note.slug}`}
+            className="text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+          >
+            Exit
+          </Link>
+          <span className="hidden truncate text-sm font-semibold text-zinc-800 sm:inline dark:text-zinc-200">
+            {note.title} — Exam
+          </span>
+          <span className="ml-auto text-sm font-medium text-zinc-500 dark:text-zinc-400">
+            {index + 1} / {total}
+          </span>
+        </div>
+        <div className="h-1 w-full bg-zinc-100 dark:bg-zinc-800">
+          <div
+            className="h-full transition-all duration-300 ease-out"
+            style={{ width: `${((index + 1) / total) * 100}%`, backgroundColor: note.accent }}
+          />
+        </div>
+      </div>
+
+      <div className="mx-auto flex w-full min-h-0 max-w-3xl flex-1 flex-col overflow-y-auto px-4 py-8 sm:px-6">
+        <div className="flex flex-1 flex-col rounded-2xl border border-black/5 bg-white p-6 shadow-xl sm:p-8 dark:border-white/10 dark:bg-zinc-900">
+          <span
+            className="mb-3 inline-flex w-fit items-center rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-wide"
+            style={{ backgroundColor: `${note.accent}26`, color: note.accent }}
+          >
+            {question.type === "mcq"
+              ? "Multiple choice"
+              : question.type === "coding"
+                ? "Coding"
+                : "Short answer"}
+          </span>
+
+          <p className="mb-6 text-lg font-semibold leading-relaxed text-zinc-900 dark:text-zinc-50">
+            {question.prompt}
+          </p>
+
+          {question.type === "mcq" && (
+            <div className="flex flex-col gap-2.5">
+              {question.options?.map((option) => {
+                const selected = answers[question.id] === option;
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setAnswer(question.id, option)}
+                    className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm transition-colors ${
+                      selected
+                        ? "border-transparent bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+                        : "border-black/10 text-zinc-700 hover:bg-zinc-50 dark:border-white/10 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                    }`}
+                  >
+                    <span
+                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+                        selected
+                          ? "border-white bg-white dark:border-zinc-900 dark:bg-zinc-900"
+                          : "border-zinc-300 dark:border-zinc-600"
+                      }`}
+                    >
+                      {selected && (
+                        <span
+                          className="h-2 w-2 rounded-full bg-zinc-900 dark:bg-white"
+                        />
+                      )}
+                    </span>
+                    {option}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {question.type === "descriptive" && (
+            <div className="flex flex-1 flex-col gap-3">
+              <textarea
+                value={answers[question.id] ?? ""}
+                onChange={(e) => setAnswer(question.id, e.target.value)}
+                placeholder="Type your answer here…"
+                rows={6}
+                className="w-full flex-1 resize-none rounded-xl border border-black/10 bg-white p-4 text-sm leading-relaxed text-zinc-900 outline-none focus:border-zinc-400 dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-600"
+              />
+              <div>
+                <MicButton
+                  onResult={(transcript) =>
+                    setAnswer(
+                      question.id,
+                      answers[question.id] ? `${answers[question.id]} ${transcript}` : transcript
+                    )
+                  }
+                />
+              </div>
+            </div>
+          )}
+
+          {question.type === "coding" && (
+            <div className="flex flex-1 flex-col gap-2">
+              {question.language && (
+                <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500">
+                  Suggested language: {question.language}
+                </span>
+              )}
+              <textarea
+                value={answers[question.id] ?? ""}
+                onChange={(e) => setAnswer(question.id, e.target.value)}
+                placeholder="// Write your code here"
+                rows={10}
+                spellCheck={false}
+                className="w-full flex-1 resize-none rounded-xl border border-black/10 bg-[#0d1117] p-4 font-mono text-[13px] leading-relaxed text-zinc-100 outline-none focus:border-zinc-600"
+              />
+            </div>
+          )}
+
+          {error && (
+            <p className="mt-4 text-sm font-medium text-red-600 dark:text-red-400">{error}</p>
+          )}
+        </div>
+
+        <div className="mt-4 flex shrink-0 items-center justify-between gap-4">
+          <button
+            type="button"
+            onClick={() => setIndex((i) => Math.max(0, i - 1))}
+            disabled={index === 0}
+            className="rounded-full border border-black/10 px-5 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          >
+            Previous
+          </button>
+
+          {isLast ? (
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="rounded-full px-6 py-2.5 text-sm font-semibold text-white shadow-md transition-transform hover:scale-[1.03] active:scale-100"
+              style={{ backgroundColor: note.accent, color: "#1c1917" }}
+            >
+              Submit exam
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIndex((i) => Math.min(total - 1, i + 1))}
+              className="rounded-full px-6 py-2.5 text-sm font-semibold text-white shadow-md transition-transform hover:scale-[1.03] active:scale-100"
+              style={{ backgroundColor: note.accent, color: "#1c1917" }}
+            >
+              Next
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ExamResultView({ note, result }: { note: Note; result: ExamResult }) {
+  return (
+    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col overflow-y-auto px-4 py-10 sm:px-6">
+      <div className="rounded-2xl border border-black/5 bg-white p-6 text-center shadow-xl sm:p-10 dark:border-white/10 dark:bg-zinc-900">
+        <span
+          className="mx-auto flex h-16 w-16 items-center justify-center rounded-full text-2xl font-bold"
+          style={{ backgroundColor: `${note.accent}33`, color: note.accent }}
+        >
+          {Math.round(result.evaluation.overallScore)}
+        </span>
+        <h2 className="mt-4 text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+          Exam complete
+        </h2>
+        <p className="mx-auto mt-2 max-w-lg text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+          {result.evaluation.overallFeedback}
+        </p>
+      </div>
+
+      <div className="mt-8 flex flex-col gap-4">
+        {result.questions.map((question, i) => {
+          const qResult = result.evaluation.questionResults.find(
+            (r) => r.questionId === question.id
+          );
+          const answer = result.answers.find((a) => a.questionId === question.id)?.answer;
+          return (
+            <div
+              key={question.id}
+              className="rounded-xl border border-black/5 bg-white p-5 dark:border-white/10 dark:bg-zinc-900"
+            >
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
+                  Q{i + 1}. {question.prompt}
+                </span>
+                {qResult && (
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                      qResult.correct
+                        ? "bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-400"
+                        : "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400"
+                    }`}
+                  >
+                    {qResult.score}/{qResult.maxScore}
+                  </span>
+                )}
+              </div>
+              <p className="mb-2 whitespace-pre-wrap text-sm text-zinc-500 dark:text-zinc-400">
+                Your answer: {answer || "(no answer given)"}
+              </p>
+              {qResult && (
+                <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+                  {qResult.feedback}
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="mt-8 flex items-center gap-3">
+        <Link
+          href={`/notes/${note.slug}`}
+          className="rounded-full border border-black/10 px-5 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-white/10 dark:text-zinc-300 dark:hover:bg-zinc-800"
+        >
+          Back to note
+        </Link>
+        <Link
+          href="/results"
+          className="rounded-full bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+        >
+          View all results
+        </Link>
+      </div>
+    </div>
+  );
+}
