@@ -1,10 +1,12 @@
 import { javascriptNotes } from "@/notes/java-script";
 import { nodejsNotes } from "@/notes/node-js";
+import { reactNotes } from "@/notes/react-js";
 import type { Note, NoteData } from "@/lib/types";
 
 const registry: Record<string, NoteData> = {
   javascript: javascriptNotes,
   nodejs: nodejsNotes,
+  react: reactNotes,
 };
 
 export function getAllNotes(): Note[] {
