@@ -29,7 +29,7 @@ export function InterviewBanner({ topicCount }: { topicCount: number }) {
           Take a Mock Interview
         </h2>
         <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-zinc-300">
-          Choose Full Stack, Frontend, or Backend — combined interviews drawing from all{" "}
+          Choose Full Stack, Frontend, Backend, or DSA — combined interviews drawing from all{" "}
           {topicCount} topics. Answer by typing, code, or speak your answer aloud.
         </p>
       </div>
