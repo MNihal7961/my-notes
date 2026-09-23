@@ -66,6 +66,17 @@ export const INTERVIEW_TRACKS: InterviewTrack[] = [
     icon: "/images/backend-icon.svg",
     noteSlugs: ["javascript", "nodejs", "mongodb", "dsa"],
   },
+  {
+    // Not "dsa": track slugs are checked before note slugs in getExamNote,
+    // so reusing the note's slug would hijack /notes/dsa/exam.
+    slug: "dsa-interview",
+    title: "DSA Interview",
+    description:
+      "A data structures and algorithms mock interview — Big O, arrays, hash maps, sorting, heaps, trees and graphs, with coding questions.",
+    accent: "#fb923c",
+    icon: "/images/dsa-icon.svg",
+    noteSlugs: ["dsa"],
+  },
 ];
 
 export function getInterviewTrack(slug: string): InterviewTrack | undefined {
