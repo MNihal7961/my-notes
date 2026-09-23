@@ -43,28 +43,28 @@ export const INTERVIEW_TRACKS: InterviewTrack[] = [
     slug: "full-stack",
     title: "Full Stack Interview",
     description:
-      "A comprehensive mock interview spanning JavaScript, Node.js, React, MongoDB and Next.js — the full stack, in one sitting.",
+      "A comprehensive mock interview spanning JavaScript, Node.js, React, MongoDB, Next.js and DSA basics — the full stack, in one sitting.",
     accent: "#818cf8",
     icon: "/images/fullstack-icon.svg",
-    noteSlugs: ["javascript", "nodejs", "react", "mongodb", "nextjs"],
+    noteSlugs: ["javascript", "nodejs", "react", "mongodb", "nextjs", "dsa"],
   },
   {
     slug: "frontend",
     title: "Frontend Interview",
     description:
-      "A frontend-focused mock interview covering React, JavaScript and Next.js — rendering, hooks, state and the browser side of the stack.",
+      "A frontend-focused mock interview covering React, JavaScript, Next.js and DSA basics — rendering, hooks, state and the browser side of the stack.",
     accent: "#38bdf8",
     icon: "/images/frontend-icon.svg",
-    noteSlugs: ["react", "javascript", "nextjs"],
+    noteSlugs: ["react", "javascript", "nextjs", "dsa"],
   },
   {
     slug: "backend",
     title: "Backend Interview",
     description:
-      "A backend-focused mock interview covering JavaScript, Node.js and MongoDB — APIs, async work, and data.",
+      "A backend-focused mock interview covering JavaScript, Node.js, MongoDB and DSA basics — APIs, async work, data and algorithms.",
     accent: "#34d399",
     icon: "/images/backend-icon.svg",
-    noteSlugs: ["javascript", "nodejs", "mongodb"],
+    noteSlugs: ["javascript", "nodejs", "mongodb", "dsa"],
   },
 ];
 
