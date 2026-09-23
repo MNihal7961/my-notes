@@ -3,6 +3,7 @@ import { nodejsNotes } from "@/notes/node-js";
 import { reactNotes } from "@/notes/react-js";
 import { mongodbNotes } from "@/notes/mong-db";
 import { nextjsNotes } from "@/notes/next-js";
+import { dsaNotes } from "@/notes/dsa";
 import type { Note, NoteData, Slide } from "@/lib/types";
 
 const registry: Record<string, NoteData> = {
@@ -11,6 +12,7 @@ const registry: Record<string, NoteData> = {
   react: reactNotes,
   mongodb: mongodbNotes,
   nextjs: nextjsNotes,
+  dsa: dsaNotes,
 };
 
 export function getAllNotes(): Note[] {
