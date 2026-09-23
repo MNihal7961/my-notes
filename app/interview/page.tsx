@@ -35,7 +35,7 @@ export default function InterviewChooserPage() {
         code, or speak your answer aloud.
       </p>
 
-      <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-3">
+      <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {INTERVIEW_TRACKS.map((track) => (
           <Link
             key={track.slug}
