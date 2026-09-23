@@ -470,7 +470,7 @@ function kLargest(nums, k) {
   return heap.items;
 }
 
-kLargest([3, 1, 5, 12, 2, 11], 3); // [5, 12, 11]`,
+kLargest([3, 1, 5, 12, 2, 11], 3); // [5, 11, 12] (heap order)`,
       },
     },
 
