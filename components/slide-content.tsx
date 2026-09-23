@@ -1,51 +1,68 @@
-type Run = { type: "bullet" | "text"; lines: string[] };
+import { parseSlideContent, tokenize } from "@/lib/slide-text";
 
-function toBlocks(content: string): string[][] {
-  return content
-    .trim()
-    .split(/\n\s*\n/)
-    .map((block) =>
-      block
-        .split("\n")
-        .map((line) => line.trim())
-        .filter((line) => line.length > 0)
-    )
-    .filter((block) => block.length > 0);
+export type SpeechHighlight = { line: number; char: number } | null;
+
+export function SpokenText({
+  text,
+  lineId,
+  highlight,
+}: {
+  text: string;
+  lineId: number;
+  highlight?: SpeechHighlight;
+}) {
+  if (!highlight || highlight.line !== lineId) return <>{text}</>;
+
+  return (
+    <>
+      {tokenize(text).map((token) => {
+        const active =
+          token.isWord && highlight.char >= token.start && highlight.char < token.end;
+        if (!active) return token.text;
+        return (
+          <mark
+            key={token.start}
+            data-active-word=""
+            className="rounded-sm text-inherit"
+            style={{
+              backgroundColor: "color-mix(in srgb, var(--note-accent, #a1a1aa) 40%, transparent)",
+              boxShadow: "0 0 0 2px color-mix(in srgb, var(--note-accent, #a1a1aa) 40%, transparent)",
+            }}
+          >
+            {token.text}
+          </mark>
+        );
+      })}
+    </>
+  );
 }
 
-function toRuns(lines: string[]): Run[] {
-  const runs: Run[] = [];
-  for (const line of lines) {
-    const isBullet = line.startsWith("•");
-    const type: Run["type"] = isBullet ? "bullet" : "text";
-    const last = runs[runs.length - 1];
-    if (last && last.type === type) {
-      last.lines.push(line);
-    } else {
-      runs.push({ type, lines: [line] });
-    }
-  }
-  return runs;
-}
-
-export function SlideContent({ content }: { content: string }) {
-  const blocks = toBlocks(content);
+export function SlideContent({
+  content,
+  highlight,
+}: {
+  content: string;
+  highlight?: SpeechHighlight;
+}) {
+  const blocks = parseSlideContent(content);
 
   return (
     <div className="space-y-5">
-      {blocks.map((lines, blockIndex) => (
+      {blocks.map((runs, blockIndex) => (
         <div key={blockIndex} className="space-y-2.5">
-          {toRuns(lines).map((run, runIndex) => {
+          {runs.map((run, runIndex) => {
             if (run.type === "bullet") {
               return (
                 <ul key={runIndex} className="space-y-1.5">
-                  {run.lines.map((line, i) => (
-                    <li key={i} className="flex gap-2.5 text-[15px] leading-relaxed text-zinc-700 dark:text-zinc-300">
+                  {run.lines.map((line) => (
+                    <li key={line.id} className="flex gap-2.5 text-[15px] leading-relaxed text-zinc-700 dark:text-zinc-300">
                       <span
                         className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full"
                         style={{ backgroundColor: "var(--note-accent, #71717a)" }}
                       />
-                      <span>{line.replace(/^•\s*/, "")}</span>
+                      <span>
+                        <SpokenText text={line.text} lineId={line.id} highlight={highlight} />
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -54,31 +71,28 @@ export function SlideContent({ content }: { content: string }) {
 
             return (
               <div key={runIndex} className="space-y-2">
-                {run.lines.map((line, i) => {
-                  const isQuote = /^".*"$/.test(line);
-                  const isLabel = /:$/.test(line) && line.length < 40;
-
-                  if (isQuote) {
+                {run.lines.map((line) => {
+                  if (line.kind === "quote") {
                     return (
                       <p
-                        key={i}
+                        key={line.id}
                         className="border-l-2 border-zinc-300 pl-3 text-[15px] leading-relaxed text-zinc-500 italic dark:border-zinc-700 dark:text-zinc-400"
                       >
-                        {line.slice(1, -1)}
+                        <SpokenText text={line.text} lineId={line.id} highlight={highlight} />
                       </p>
                     );
                   }
 
                   return (
                     <p
-                      key={i}
+                      key={line.id}
                       className={
-                        isLabel
+                        line.kind === "label"
                           ? "text-[15px] font-semibold text-zinc-900 dark:text-zinc-100"
                           : "text-[15px] leading-relaxed text-zinc-700 dark:text-zinc-300"
                       }
                     >
-                      {line}
+                      <SpokenText text={line.text} lineId={line.id} highlight={highlight} />
                     </p>
                   );
                 })}
