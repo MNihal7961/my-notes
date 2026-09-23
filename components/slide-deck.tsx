@@ -5,9 +5,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { Note } from "@/lib/types";
-import { SlideContent } from "@/components/slide-content";
+import { SlideContent, SpokenText } from "@/components/slide-content";
 import { CodeBlock } from "@/components/code-block";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { ListenControls } from "@/components/listen-controls";
+import { getSpeechLines } from "@/lib/slide-text";
+import { rankVoices, useSpeech, useVoices } from "@/lib/use-speech";
+import { useStoredState } from "@/lib/use-stored-state";
+import { playPageTurn, preloadPageTurn } from "@/lib/page-turn-sound";
 
 const flipVariants = {
   enter: (dir: number) => ({ opacity: 0, rotateY: dir > 0 ? 90 : -90 }),
@@ -27,13 +32,82 @@ export function SlideDeck({ note, initialIndex = 0 }: { note: Note; initialIndex
   const isComplete = index >= total;
   const progress = Math.min(((index + (isComplete ? 0 : 0)) / total) * 100, 100);
 
+  const [pageSound, setPageSound] = useStoredState<boolean>("notes:page-sound", true);
+  const [rate, setRate] = useStoredState<number>("notes:speech-rate", 1);
+  const [voiceURI, setVoiceURI] = useStoredState<string>("notes:speech-voice", "");
+  const [autoAdvance, setAutoAdvance] = useStoredState<boolean>("notes:speech-auto-turn", true);
+
+  const allVoices = useVoices();
+  const voices = useMemo(() => rankVoices(allVoices), [allVoices]);
+  const voice = voices.find((v) => v.voiceURI === voiceURI) ?? voices[0] ?? null;
+
+  // Set when the next slide should start reading as soon as it has flipped in.
+  const continueReadingRef = useRef(false);
+  const advanceRef = useRef(() => {});
+  const handleReadComplete = useCallback(() => {
+    if (autoAdvance) advanceRef.current();
+  }, [autoAdvance]);
+
+  const speech = useSpeech({ voice, rate, onComplete: handleReadComplete });
+  const { play: playSpeech, stop: stopSpeech } = speech;
+
   const goTo = useCallback(
-    (next: number) => {
-      setDirection(next > index ? 1 : -1);
-      setIndex(Math.max(0, Math.min(next, total)));
+    (next: number, keepReading = speech.status === "playing" || continueReadingRef.current) => {
+      const target = Math.max(0, Math.min(next, total));
+      if (target === index) return;
+      stopSpeech();
+      continueReadingRef.current = keepReading;
+      if (pageSound) void playPageTurn();
+      setDirection(target > index ? 1 : -1);
+      setIndex(target);
     },
-    [index, total]
+    [index, total, pageSound, speech.status, stopSpeech]
   );
+
+  useEffect(() => {
+    preloadPageTurn();
+  }, []);
+
+  useEffect(() => {
+    advanceRef.current = () => goTo(index + 1, true);
+  }, [goTo, index]);
+
+  useEffect(() => {
+    if (!continueReadingRef.current) return;
+    continueReadingRef.current = false;
+    if (index >= total) return;
+    const next = note.slides[index];
+    // Wait for the page flip to finish before reading.
+    const timer = window.setTimeout(
+      () => playSpeech(getSpeechLines(next.title, next.content)),
+      500
+    );
+    return () => window.clearTimeout(timer);
+  }, [index, total, note.slides, playSpeech]);
+
+  const toggleListening = useCallback(() => {
+    if (speech.status === "playing") speech.pause();
+    else if (speech.status === "paused") speech.resume();
+    else if (index < total) {
+      const current = note.slides[index];
+      speech.play(getSpeechLines(current.title, current.content));
+    }
+  }, [speech, index, total, note.slides]);
+
+  // Keep the word being read in view inside the slide's scroll area.
+  useEffect(() => {
+    const container = scrollRef.current;
+    const word = container?.querySelector("[data-active-word]");
+    if (!container || !word) return;
+    const wordRect = word.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    if (wordRect.top < containerRect.top + 32 || wordRect.bottom > containerRect.bottom - 64) {
+      container.scrollTo({
+        top: container.scrollTop + wordRect.top - containerRect.top - containerRect.height / 3,
+        behavior: "smooth",
+      });
+    }
+  }, [speech.position]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -191,6 +265,23 @@ export function SlideDeck({ note, initialIndex = 0 }: { note: Note; initialIndex
         )}
 
         <div className="flex min-h-0 min-w-0 flex-1 flex-col" style={{ perspective: 2000 }}>
+          <ListenControls
+            accent={note.accent}
+            supported={speech.supported}
+            disabled={isComplete}
+            status={speech.status}
+            onToggle={toggleListening}
+            onStop={stopSpeech}
+            rate={rate}
+            onRateChange={setRate}
+            voices={voices}
+            voiceURI={voice?.voiceURI ?? ""}
+            onVoiceChange={setVoiceURI}
+            autoAdvance={autoAdvance}
+            onAutoAdvanceChange={setAutoAdvance}
+            pageSound={pageSound}
+            onPageSoundChange={setPageSound}
+          />
           <AnimatePresence mode="wait" initial={false} custom={direction}>
             {isComplete ? (
               <motion.div
@@ -225,7 +316,7 @@ export function SlideDeck({ note, initialIndex = 0 }: { note: Note; initialIndex
                   <div className="mt-8 flex items-center gap-3">
                     <button
                       type="button"
-                      onClick={() => goTo(0)}
+                      onClick={() => goTo(0, false)}
                       className="rounded-full border border-black/10 px-5 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-white/10 dark:text-zinc-300 dark:hover:bg-zinc-800"
                     >
                       Restart
@@ -267,11 +358,11 @@ export function SlideDeck({ note, initialIndex = 0 }: { note: Note; initialIndex
                       Topic {index + 1} of {total}
                     </span>
                     <h2 className="mb-6 text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-50">
-                      {slide.title}
+                      <SpokenText text={slide.title} lineId={0} highlight={speech.position} />
                     </h2>
 
                     <div className="grid flex-1 gap-8 lg:grid-cols-2 lg:items-start">
-                      <SlideContent content={slide.content} />
+                      <SlideContent content={slide.content} highlight={speech.position} />
                       {slide.code && (
                         <CodeBlock language={slide.code.language} code={slide.code.code} />
                       )}
