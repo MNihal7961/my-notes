@@ -94,6 +94,96 @@ console.log(name); // ReferenceError`,
     },
 
     {
+      title: "Global Scope",
+      content: `
+A variable declared outside of any function or block lives in the global scope.
+
+• It can be accessed from anywhere in the program
+• In browsers, global var declarations become properties of window
+• let and const at the top level are global but are not added to window
+• Too many globals can cause naming conflicts and hard-to-find bugs
+
+Interview Answer:
+"Global scope is the outermost scope. Variables declared there are accessible from any part of the code."
+      `,
+      code: {
+        language: "javascript",
+        code: `var appName = "My Notes";
+let version = 1;
+
+function showInfo() {
+  console.log(appName, version); // accessible here
+}
+
+showInfo();
+console.log(window.appName); // "My Notes"
+console.log(window.version); // undefined`,
+      },
+    },
+
+    {
+      title: "Function Scope",
+      content: `
+Variables declared inside a function are only available inside that function.
+
+• Every function call creates its own new scope
+• var, let and const are all function scoped when declared inside a function
+• Inner functions can read variables from outer functions (lexical scope)
+• Outer code cannot access variables declared inside the function
+
+Interview Answer:
+"Function scope means a variable declared inside a function can only be used within that function."
+      `,
+      code: {
+        language: "javascript",
+        code: `function greet() {
+  var message = "Hello";
+  let user = "Nihal";
+
+  function inner() {
+    console.log(message, user); // works
+  }
+
+  inner();
+}
+
+greet();
+console.log(message); // ReferenceError`,
+      },
+    },
+
+    {
+      title: "Block Scope",
+      content: `
+A block is any code inside curly braces, like if, for, while or a plain { }.
+
+• let and const are block scoped
+• var ignores blocks and leaks out to the surrounding function
+• Block scope makes loops safer, since each iteration gets its own let variable
+• Prefer let and const to avoid accidental leaks
+
+Interview Answer:
+"Block scope means variables declared with let or const exist only inside the curly braces where they are defined."
+      `,
+      code: {
+        language: "javascript",
+        code: `if (true) {
+  var a = 1;
+  let b = 2;
+  const c = 3;
+}
+
+console.log(a); // 1 (var leaks out)
+console.log(b); // ReferenceError
+console.log(c); // ReferenceError
+
+for (let i = 0; i < 3; i++) {
+  setTimeout(() => console.log(i)); // 0, 1, 2
+}`,
+      },
+    },
+
+    {
       title: "Hoisting",
       content: `
 Hoisting means JavaScript moves declarations to the top of their scope before running the code.
